@@ -3,25 +3,32 @@ const College = require("../models/collegeSchema"); // Import College model
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
+
 const register = async (req, res) => {
   try {
-    let { name, email, password, role, registrationNumber } = req.body;
+    let { name, email, password, role, registrationNumber, cv } = req.body;
 
     // Check if user already exists
     const existingUser = await User.findOne({ email });
-    if (existingUser)
+    if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
+    }
 
-    // If the role is "collegeAdmin", ensure the registrationNumber is valid
+    // Validate registrationNumber for CollegeAdmins and Students
     let collegeId = null;
     if (role === "collegeAdmin" || role === "student") {
       const college = await College.findOne({ registrationNumber });
       if (!college) {
-        return res
-          .status(400)
-          .json({ message: "Invalid Registration Number. College not found." });
+        return res.status(400).json({
+          message: "Invalid Registration Number. College not found.",
+        });
       }
-      collegeId = college._id; // Assign the correct collegeId
+      collegeId = college._id;
+    }
+
+    // Ensure CV is required for students
+    if (role === "student" && !cv) {
+      return res.status(400).json({ message: "CV is required for students" });
     }
 
     // Hash the password
@@ -34,16 +41,19 @@ const register = async (req, res) => {
       password: hashedPassword,
       role,
       collegeId,
+      cv, // ✅ Added CV field
     });
 
-    res
-      .status(201)
-      .json({ message: "User registered successfully", user: newUser });
+    res.status(201).json({
+      message: "User registered successfully",
+      user: newUser,
+    });
   } catch (error) {
     console.error("Registration Error:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
+
 
 const login = async (req, res) => {
   try {
@@ -116,7 +126,34 @@ const getAllUsers = async (req, res) => {
 
 // Get logged-in user details
 const getUserProfile = async (req, res) => {
-  res.status(200).json(req.user);
+  try {
+    const user = await User.findById(req.user._id).select("name email cv"); // 🔥 Ensure cvUrl is included
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
 };
 
-module.exports = { register, login, logout, getAllUsers, getUserProfile };
+const uploadCV = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    const userId = req.user._id;
+    const cvUrl = req.file.path; // Assuming you use Cloudinary or local storage
+
+    const user = await User.findByIdAndUpdate(userId, { cvUrl }, { new: true });
+
+    res.status(200).json({ message: "CV uploaded successfully", cvUrl });
+  } catch (error) {
+    console.error("CV Upload Error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+module.exports = { register, login, logout, getAllUsers, getUserProfile, uploadCV };

@@ -8,22 +8,37 @@ const applyForJob = async (req, res) => {
     const { jobId } = req.body;
     const studentId = req.user._id;
 
+    // Check if the job exists
     const job = await Job.findById(jobId);
     if (!job) return res.status(404).json({ message: "Job not found" });
 
+    // Check if the student has already applied
     const existingApplication = await Application.findOne({ studentId, jobId });
     if (existingApplication) {
       return res.status(400).json({ message: "Already applied" });
     }
 
-    const newApplication = new Application({ studentId, jobId });
+    // Fetch the student's CV URL from the User model
+    const student = await User.findById(studentId);
+    if (!student || !student.cv) {
+      return res.status(400).json({ message: "CV is required to apply for jobs" });
+    }
+
+    // Create a new job application with the student's CV URL
+    const newApplication = new Application({
+      studentId,
+      jobId,
+      cvUrl: student.cv, // Attach student's CV URL
+    });
+
     await newApplication.save();
 
     res.status(201).json({ 
       message: "Job application submitted successfully", 
-      jobId: jobId  // Return the applied job ID
+      application: newApplication 
     });
   } catch (error) {
+    console.error("Error applying for job:", error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
@@ -34,8 +49,9 @@ const getApplicantsByJob = async (req, res) => {
   try {
     const { jobId } = req.params;
     
-    // Find applications and populate student details
-    const applicants = await Application.find({ jobId }).populate("studentId", "name email");
+    // Find applications and populate student details along with CV URL
+    const applicants = await Application.find({ jobId })
+      .populate("studentId", "name email cv"); // Include CV URL
 
     if (!applicants.length) {
       return res.status(404).json({ message: "No applicants found for this job" });
@@ -43,6 +59,7 @@ const getApplicantsByJob = async (req, res) => {
 
     res.status(200).json(applicants);
   } catch (error) {
+    console.error("Error fetching applicants:", error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
@@ -94,7 +111,6 @@ const updateApplicationStatus = async (req, res) => {
 };
 
 //delete
-
 const deleteApplication = async (req, res) => {
   try {
     const { id } = req.params; // Application ID

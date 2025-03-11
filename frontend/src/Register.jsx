@@ -20,23 +20,63 @@ const Register = () => {
     password: "",
     role: "student",
     registrationNumber: "",
+    cv: "",
   });
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+  
+    const cvFormData = new FormData();
+    cvFormData.append("file", file);
+    cvFormData.append("upload_preset", "CHANDAN-SRMS");
+  
+    try {
+      const response = await axios.post(
+        "https://api.cloudinary.com/v1_1/dx4ctlu0h/upload",
+        cvFormData
+      );
+      
+      // Ensure all fields are retained when updating cv
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        cv: response.data.secure_url,
+      }));
+  
+      toast.success("CV uploaded successfully!");
+    } catch (error) {
+      toast.error("CV upload failed!");
+    }
+  };
+  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+  
+    if (formData.role === "student" && !formData.cv) {
+      toast.error("Please upload your CV before registering!");
+      return;
+    }
+  
+    console.log("Submitting data:", formData); // Debugging
+  
     try {
-        await console.log(formData)
-      const response = await axios.post("http://localhost:4000/api/v1/user/register", formData);
+      const response = await axios.post(
+        "http://localhost:4000/api/v1/user/register",
+        formData
+      );
       toast.success(response.data.message);
-      setTimeout(() => navigate("/"), 1500); // Redirect after success
+      setTimeout(() => navigate("/"), 1500);
     } catch (error) {
+      console.error("Registration Error:", error.response?.data);
       toast.error(error.response?.data?.message || "Registration failed!");
     }
   };
+  
 
   return (
     <Container maxWidth="sm">
@@ -46,21 +86,77 @@ const Register = () => {
           Register
         </Typography>
         <Box component="form" onSubmit={handleSubmit}>
-          <TextField fullWidth label="Full Name" name="name" value={formData.name} onChange={handleChange} margin="normal" required />
-          <TextField fullWidth type="email" label="Email" name="email" value={formData.email} onChange={handleChange} margin="normal" required />
-          <TextField fullWidth type="password" label="Password" name="password" value={formData.password} onChange={handleChange} margin="normal" required />
-          <TextField select fullWidth label="Role" name="role" value={formData.role} onChange={handleChange} margin="normal">
+          <TextField
+            fullWidth
+            label="Full Name"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            margin="normal"
+            required
+          />
+          <TextField
+            fullWidth
+            type="email"
+            label="Email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            margin="normal"
+            required
+          />
+          <TextField
+            fullWidth
+            type="password"
+            label="Password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            margin="normal"
+            required
+          />
+          <TextField
+            select
+            fullWidth
+            label="Role"
+            name="role"
+            value={formData.role}
+            onChange={handleChange}
+            margin="normal"
+          >
             <MenuItem value="student">Student</MenuItem>
             <MenuItem value="collegeAdmin">College Admin</MenuItem>
           </TextField>
           {formData.role !== "mainAdmin" && (
-            <TextField fullWidth label="College ID" name="registrationNumber" value={formData.collegeId} onChange={handleChange} margin="normal" required />
+            <TextField
+              fullWidth
+              label="College ID"
+              name="registrationNumber"
+              value={formData.registrationNumber}
+              onChange={handleChange}
+              margin="normal"
+              required
+            />
+          )}
+          {formData.role === "student" && (
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="body1">Upload CV (PDF Only)</Typography>
+              <input
+                type="file"
+                accept="application/pdf"
+                onChange={handleFileChange}
+                required
+              />
+            </Box>
           )}
           <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2 }}>
             Register
           </Button>
           <Typography sx={{ mt: 2, textAlign: "center" }}>
-            Already have an account? <span onClick={() => navigate("/")} style={styles.link}>Login</span>
+            Already have an account?{" "}
+            <span onClick={() => navigate("/")} style={styles.link}>
+              Login
+            </span>
           </Typography>
         </Box>
       </Box>

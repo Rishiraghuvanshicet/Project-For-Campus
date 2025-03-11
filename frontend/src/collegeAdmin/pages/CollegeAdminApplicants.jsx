@@ -3,7 +3,7 @@ import axios from "axios";
 import { 
   Container, Typography, Select, MenuItem, Table, TableBody, 
   TableCell, TableContainer, TableHead, TableRow, Paper, 
-  CircularProgress, Button, IconButton 
+  CircularProgress, Button, IconButton, Link 
 } from "@mui/material";
 import { Cancel } from "@mui/icons-material"; // Import cross-circle icon
 
@@ -37,6 +37,7 @@ const CollegeAdminApplicants = () => {
       const response = await axios.get(`http://localhost:4000/api/v1/application/applicants/${jobId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      console.log(applicants)
       setApplicants(response.data || []);
     } catch (error) {
       console.error("Error fetching applicants:", error);
@@ -110,6 +111,7 @@ const CollegeAdminApplicants = () => {
               <TableRow>
                 <TableCell><strong>Name</strong></TableCell>
                 <TableCell><strong>Email</strong></TableCell>
+                <TableCell><strong>CV</strong></TableCell>
                 <TableCell><strong>Status</strong></TableCell>
                 <TableCell><strong>Actions</strong></TableCell>
                 <TableCell align="right"><strong>Remove</strong></TableCell>
@@ -121,6 +123,20 @@ const CollegeAdminApplicants = () => {
                   <TableRow key={applicant._id}>
                     <TableCell>{applicant.studentId.name}</TableCell>
                     <TableCell>{applicant.studentId.email}</TableCell>
+                    <TableCell>
+                      {applicant.studentId.cv ? (
+                        <Link 
+                          href={applicant.studentId.cv} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          sx={{ color: "blue", fontWeight: "bold" }}
+                        >
+                          CV
+                        </Link>
+                      ) : (
+                        <Typography sx={{ color: "gray" }}>No CV uploaded</Typography>
+                      )}
+                    </TableCell>
                     <TableCell>
                       <Typography 
                         sx={{ 
@@ -166,7 +182,7 @@ const CollegeAdminApplicants = () => {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={5} align="center">No applicants found.</TableCell>
+                  <TableCell colSpan={6} align="center">No applicants found.</TableCell>
                 </TableRow>
               )}
             </TableBody>

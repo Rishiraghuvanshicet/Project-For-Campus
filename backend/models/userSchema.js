@@ -12,6 +12,12 @@ const userSchema = new mongoose.Schema({
       return this.role !== "mainAdmin"; // Required only if the user is not mainAdmin
     },
   },
+  cv: {
+    type: String,
+    required: function () {
+      return this.role === "student";
+    },
+  },
 });
 
 module.exports = mongoose.model("User", userSchema);

@@ -7,11 +7,13 @@ import CardList from "../components/CardList";
 const StudentDashboard = () => {
   const [jobs, setJobs] = useState([]);
   const [appliedJobs, setAppliedJobs] = useState([]);
+  const [cvUrl, setCvUrl] = useState(""); // Store student's CV URL
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchJobs();
-    fetchAppliedJobs();
+    fetchStudentProfile(); 
+    fetchAppliedJobs();// Fetch student's CV
   }, []);
 
   const fetchJobs = async () => {
@@ -32,23 +34,41 @@ const StudentDashboard = () => {
       const response = await axios.get("http://localhost:4000/api/v1/application/getAppliedJobs", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setAppliedJobs(response.data.map((app) => app.jobId._id)); // Store jobIds of applied jobs
+      console.log("hii2")
+      setAppliedJobs(response.data.map((app) => app.jobId._id)); // Store applied job IDs
     } catch (error) {
       console.error("Error fetching applied jobs:", error);
     }
   };
 
+  const fetchStudentProfile = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get("http://localhost:4000/api/v1/user/profile", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      console.log(response.data.cv)
+      setCvUrl(response.data.cv || ""); // Store CV URL
+    } catch (error) {
+      console.error("Error fetching student profile:", error);
+    }
+  };
+
   const applyForJob = async (jobId) => {
     try {
+      if (!cvUrl) {
+        alert("Please upload your CV before applying for jobs.");
+        return;
+      }
       const token = localStorage.getItem("token");
       const response = await axios.post(
         "http://localhost:4000/api/v1/application/apply",
-        { jobId },
+        { jobId, cvUrl }, // Send CV URL with job application
         { headers: { Authorization: `Bearer ${token}` } }
       );
-  
+
       if (response.status === 201) {
-        alert("Application submitted successfully!"); // Show success message
+        alert("Application submitted successfully!");
         setAppliedJobs((prev) => [...prev, jobId]); // Update applied jobs state
       }
     } catch (error) {
@@ -56,6 +76,7 @@ const StudentDashboard = () => {
       alert(error.response?.data?.message || "Application failed.");
     }
   };
+
   const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/");
