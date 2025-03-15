@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Container, Typography, Button, Box } from "@mui/material";
 import CardList from "../components/CardList";
+import StudentHeader from "../components/StudentHeader";
 
 const StudentDashboard = () => {
   const [jobs, setJobs] = useState([]);
@@ -77,24 +78,18 @@ const StudentDashboard = () => {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/");
-  };
-
   return (
-    <Container maxWidth="lg">
+    <>
+    <StudentHeader/>
+    <Container maxWidth="lg" sx={{marginTop:"100px"}}>
       <Box sx={{ mt: 5, display: "flex", justifyContent: "space-between" }}>
         <Typography variant="h4" sx={{ fontWeight: "bold" }}>
           Student Dashboard
         </Typography>
-        <Button variant="contained" color="error" onClick={handleLogout}>
-          Logout
-        </Button>
       </Box>
 
       <Box sx={{ textAlign: "center", mt: 3 }}>
-        <Typography variant="h6" color="primary">
+        <Typography variant="h6" sx={{ fontWeight: "bold" }}>
           Jobs Applied: {appliedJobs.length}
         </Typography>
       </Box>
@@ -111,6 +106,7 @@ const StudentDashboard = () => {
         />
       </Box>
     </Container>
+    </>
   );
 };
 

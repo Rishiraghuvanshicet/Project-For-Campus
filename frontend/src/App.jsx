@@ -14,6 +14,7 @@ import CollegeAdminViewApplicants from "./collegeAdmin/pages/CollegeAdminViewApp
 import StudentDashboard from "./student/pages/StudentDashboard";
 import StudentJobView from "./student/pages/StudentJobView";
 import CollegeAdminApplicants from "./collegeAdmin/pages/CollegeAdminApplicants";
+import StudentAppliedJobs from "./student/pages/StudentAppliedJobs";
 
 const App = () => {
   return (
@@ -35,6 +36,7 @@ const App = () => {
         <Route path="/student-dashboard" element={<StudentDashboard/>} />
         <Route path="/student-job-view" element={<StudentJobView/>} />
         <Route path="/college-admin-Students-applicants" element={<CollegeAdminApplicants/>}/>
+        <Route path="/student-dashboard/applied-jobs" element={<StudentAppliedJobs/>}/>
       </Routes>
     </Router>
   );

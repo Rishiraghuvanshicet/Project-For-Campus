@@ -20,8 +20,8 @@ const Login = () => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    role: "student", // Default role
-    collegeId: "", // Required only for students & college admins
+    role: "student",
+    collegeId: "",
   });
 
   // Handle form field changes
@@ -32,14 +32,12 @@ const Login = () => {
   // Handle role selection
   const handleRoleChange = (e) => {
     const selectedRole = e.target.value;
-    setFormData({ ...formData, role: selectedRole, collegeId: "" }); // Reset collegeId when role changes
+    setFormData({ ...formData, role: selectedRole, collegeId: "" });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-
-    // ✅ Basic Validation
     if (!formData.email || !formData.password || !formData.role) {
       toast.error("Please fill in all required fields.");
       return;
@@ -55,13 +53,11 @@ const Login = () => {
 
       toast.success("Login successful!");
 
-      // ✅ Store user data in localStorage
       localStorage.setItem("token", token);
       localStorage.setItem("role", user.role);
       localStorage.setItem("id", user._id);
-      localStorage.setItem("collegeId", user.collegeId || ""); // Store only if available
+      localStorage.setItem("collegeId", user.collegeId || "");
 
-      // ✅ Redirect user based on role
       setTimeout(() => {
         navigate(user.role === "collegeAdmin" ? "/college-admin-home-page" : "/student-dashboard");
       }, 2000);
@@ -71,78 +67,105 @@ const Login = () => {
   };
 
   return (
-    <Container maxWidth="sm">
-      <ToastContainer position="top-right" autoClose={3000} />
-      <Box sx={styles.container}>
-        <Typography variant="h4" sx={{ mb: 2, fontWeight: "bold" }}>
-          Login
-        </Typography>
-        <Box component="form" onSubmit={handleSubmit}>
-          <TextField
-            fullWidth
-            type="email"
-            label="Email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            margin="normal"
-            required
-          />
-          <TextField
-            fullWidth
-            type="password"
-            label="Password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            margin="normal"
-            required
-          />
-
-          {/* ✅ Role Selection */}
-           <Box sx={{ display: "flex", alignItems: "center", gap: 2, mt: 2 }}>
-           <FormLabel component="legend">Select Role:</FormLabel>
-           <RadioGroup row name="role" value={formData.role} onChange={handleRoleChange}>
-           <FormControlLabel value="collegeAdmin" control={<Radio />} label="College Admin" />
-           <FormControlLabel value="student" control={<Radio />} label="Student" />
-           </RadioGroup>
-           </Box>
-         
-
-          {/* ✅ College ID Field (Only for College Admin & Student) */}
-          {(formData.role === "collegeAdmin" || formData.role === "student") && (
+    <Box sx={styles.pageContainer}>
+      <Container maxWidth="sm">
+        <ToastContainer position="top-right" autoClose={3000} />
+        <Box sx={styles.formContainer}>
+          <Typography variant="h4" sx={{ mb: 2, fontWeight: "bold", color: "#333" }}>
+            Login
+          </Typography>
+          <Box component="form" onSubmit={handleSubmit}>
             <TextField
               fullWidth
-              label="College ID"
-              name="collegeId"
-              value={formData.collegeId}
+              type="email"
+              label="Email"
+              name="email"
+              value={formData.email}
               onChange={handleChange}
               margin="normal"
               required
+              autoComplete="off"
+              sx={styles.inputField}
             />
-          )}
+            <TextField
+              fullWidth
+              type="password"
+              label="Password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              margin="normal"
+              required
+              autoComplete="off"
+              sx={styles.inputField}
+            />
 
-          <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2 }}>
-            Login
-          </Button>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2, mt: 2 }}>
+              <FormLabel component="legend">Select Role:</FormLabel>
+              <RadioGroup row name="role" value={formData.role} onChange={handleRoleChange}>
+                <FormControlLabel value="collegeAdmin" control={<Radio />} label="College Admin" />
+                <FormControlLabel value="student" control={<Radio />} label="Student" />
+              </RadioGroup>
+            </Box>
 
-          <Typography sx={{ mt: 2, textAlign: "center" }}>
-            Don't have an account? <span onClick={() => navigate("/register")} style={styles.link}>Register</span>
-          </Typography>
+            {(formData.role === "collegeAdmin" || formData.role === "student") && (
+              <TextField
+                fullWidth
+                label="College ID"
+                name="collegeId"
+                value={formData.collegeId}
+                onChange={handleChange}
+                margin="normal"
+                required
+                sx={styles.inputField}
+              />
+            )}
+
+            <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2 }}>
+              Login
+            </Button>
+
+            <Typography sx={{ mt: 2, textAlign: "center" }}>
+              Don't have an account?{" "}
+              <span onClick={() => navigate("/register")} style={styles.link}>
+                Register
+              </span>
+            </Typography>
+          </Box>
         </Box>
-      </Box>
-    </Container>
+      </Container>
+    </Box>
   );
 };
 
 const styles = {
-  container: {
-    mt: 5,
-    p: 4,
-    borderRadius: "10px",
+  pageContainer: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    minHeight: "100vh",
+    backgroundImage: "url('https://snckollam.ac.in/kezoofti/2019/10/campus-placement.jpg')",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    backgroundAttachment: "fixed",
+    backgroundRepeat: "no-repeat",
+  },
+  formContainer: {
+    padding: "30px",
+    borderRadius: "8px",
     boxShadow: "0 4px 10px rgba(0, 0, 0, 0.1)",
-    background: "linear-gradient(135deg, #f8f9fa, #e9ecef)",
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
     textAlign: "center",
+    width: "100%",
+    maxWidth: "400px",
+    backdropFilter: "blur(8px)",
+    border: "1px solid rgba(255, 255, 255, 0.3)",
+  },
+  inputField: {
+    "& input:-webkit-autofill": {
+      boxShadow: "0 0 0px 1000px white inset !important",
+      border: "1px solid #ccc !important",
+    },
   },
   link: {
     color: "#1976d2",
