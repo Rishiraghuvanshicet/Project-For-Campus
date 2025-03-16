@@ -124,10 +124,21 @@ const getCollegeDetails = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+const getTotalStudentsByCollege = async (req, res) => {
+  try {
+    if (!req.user || req.user.role !== "collegeAdmin") {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    const studentCount = await User.countDocuments({ collegeId: req.user.collegeId, role: "student" });
+
+    res.status(200).json({ totalStudents: studentCount });
+  } catch (error) {
+    console.error("Error fetching student count:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 
 
 
-
-
-
-module.exports = { registerCollege, getAllColleges, getCollegeById, updateCollegeDetails, deleteCollege, getCollegeDetails };
+module.exports = { registerCollege, getAllColleges, getCollegeById, updateCollegeDetails, deleteCollege, getCollegeDetails, getTotalStudentsByCollege };

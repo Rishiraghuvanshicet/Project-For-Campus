@@ -116,4 +116,45 @@ const updateJob = async (req, res) => {
   }
 };
 
-module.exports = { createJob, getJobsByCollege, getSingleJobDetails, deleteJob, updateJob };
+const getTotalJobsByCollege = async (req, res) => {
+  try {
+    if (!req.user || req.user.role !== "collegeAdmin") {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    const jobCount = await Job.countDocuments({ collegeId: req.user.collegeId });
+
+    res.status(200).json({ totalJobs: jobCount });
+  } catch (error) {
+    console.error("Error fetching job count:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+const getJobPostingTimeline = async (req, res) => {
+  try {
+    const collegeId = req.user.collegeId; // Extract collegeId from authenticated user
+
+    // Fetch jobs for the college
+    const jobs = await Job.find({ collegeId }).select("createdAt");
+
+    // Group jobs by date
+    const jobTimeline = jobs.reduce((acc, job) => {
+      const date = job.createdAt.toISOString().split("T")[0]; // Extract YYYY-MM-DD
+      acc[date] = (acc[date] || 0) + 1; // Count jobs per date
+      return acc;
+    }, {});
+
+    // Convert object to array format for frontend
+    const timelineData = Object.entries(jobTimeline).map(([date, count]) => ({
+      date,
+      count,
+    }));
+
+    res.status(200).json({ success: true, timeline: timelineData });
+  } catch (error) {
+    console.error("Error fetching job posting timeline:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+module.exports = { createJob, getJobsByCollege, getSingleJobDetails, deleteJob, updateJob, getTotalJobsByCollege,getJobPostingTimeline };

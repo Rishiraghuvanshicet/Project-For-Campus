@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Container, Typography, Paper, Box, TextField, Button, Grid } from "@mui/material";
 import axios from "axios";
+import CollegeAdminHeader from "../components/CollegeAdminHeader";
 
 const CollegeAdminDashBoard = () => {
   const [collegeDetails, setCollegeDetails] = useState({
@@ -66,6 +67,7 @@ const CollegeAdminDashBoard = () => {
   };
 
   return (
+    <><CollegeAdminHeader/>
     <Container maxWidth="sm"> {/* Reduced maxWidth for better form alignment */}
       <Box sx={{ mt: 8, display: "flex", flexDirection: "column", alignItems: "center" }}>
         <Typography variant="h4" gutterBottom sx={{ textAlign: "center", fontWeight: "bold" }}>
@@ -132,7 +134,12 @@ const CollegeAdminDashBoard = () => {
                 variant="contained" 
                 color="primary" 
                 onClick={() => setIsEditing(true)} 
-                sx={{ mt: 3 }}
+                sx={{
+                  mt: 2,
+                  backgroundColor: "orangered",
+                  color: "white",
+                  "&:hover": { backgroundColor: "darkorange" },
+                }}
               >
                 Edit Details
               </Button>
@@ -141,6 +148,7 @@ const CollegeAdminDashBoard = () => {
         </Paper>
       </Box>
     </Container>
+    </>
   );
 };
 

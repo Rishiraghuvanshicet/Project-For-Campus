@@ -6,6 +6,8 @@ import {
   CircularProgress, Button, IconButton, Link 
 } from "@mui/material";
 import { Cancel } from "@mui/icons-material"; // Import cross-circle icon
+import CollegeAdminHeader from "../components/CollegeAdminHeader";
+
 
 const CollegeAdminApplicants = () => {
   const [jobs, setJobs] = useState([]);
@@ -90,6 +92,7 @@ const CollegeAdminApplicants = () => {
   };
 
   return (
+    <><CollegeAdminHeader/>
     <Container maxWidth="md">
       <Typography variant="h4" sx={{ mt: 4, mb: 3, fontWeight: "bold" }}>
         View Job Applicants
@@ -190,6 +193,7 @@ const CollegeAdminApplicants = () => {
         </TableContainer>
       )}
     </Container>
+    </>
   );
 };
 
