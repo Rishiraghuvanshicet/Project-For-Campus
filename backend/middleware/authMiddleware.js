@@ -6,7 +6,6 @@ const authMiddleware = async (req, res, next) => {
   try {
     const token = req.header("Authorization")?.split(" ")[1];
     if (!token) {
-      console.log(" No token provided");
       return res.status(401).json({ message: "Unauthorized" });
     }
 
@@ -14,7 +13,6 @@ const authMiddleware = async (req, res, next) => {
     req.user = await User.findById(decoded.userId).select("-password");
 
     if (!req.user) {
-      console.log(" User not found after decoding token");
       return res.status(401).json({ message: "Unauthorized" });
     }
     // Ensure collegeId is an ObjectId

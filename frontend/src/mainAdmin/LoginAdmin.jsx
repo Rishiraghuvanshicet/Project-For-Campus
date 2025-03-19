@@ -9,6 +9,7 @@ import {
   RadioGroup,
   FormControlLabel,
   FormLabel,
+  Paper,
 } from "@mui/material";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
@@ -61,73 +62,63 @@ const LoginAdmin = () => {
   };
 
   return (
-    <Container maxWidth="sm">
-      <Box sx={{ mt: 5, textAlign: "center" }}>
-        <Typography variant="h4">Login</Typography>
-      </Box>
-      <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
-        {/* Email Input */}
-        <TextField
-          fullWidth
-          label="Email"
-          name="email"
-          type="email"
-          value={formData.email}
-          onChange={handleChange}
-          margin="normal"
-          required
-        />
-
-        {/* Password Input */}
-        <TextField
-          fullWidth
-          label="Password"
-          name="password"
-          type="password"
-          value={formData.password}
-          onChange={handleChange}
-          margin="normal"
-          required
-        />
-
-        {/* Role Selection */}
-        <FormLabel sx={{ mt: 2 }}>Select Role</FormLabel>
-        <RadioGroup row value={formData.role} onChange={handleRoleChange}>
-          <FormControlLabel
-            value="mainAdmin"
-            control={<Radio />}
-            label="Main Admin"
+    <Container maxWidth="xs" sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh" }}>
+      <Paper elevation={3} sx={{ p: 4, borderRadius: 2, textAlign: "center", width: "100%" }}>
+        <Typography variant="h4" gutterBottom>Login</Typography>
+        <Box component="form" onSubmit={handleSubmit}>
+          {/* Email Input */}
+          <TextField
+            fullWidth
+            label="Email"
+            name="email"
+            type="email"
+            value={formData.email}
+            onChange={handleChange}
+            margin="normal"
+            required
           />
-          <FormControlLabel
-            value="collegeAdmin"
-            control={<Radio />}
-            label="College Admin"
-          />
-          <FormControlLabel
-            value="student"
-            control={<Radio />}
-            label="Student"
-          />
-        </RadioGroup>
 
-        {/* Submit Button */}
-        <Button
-          type="submit"
-          variant="contained"
-          color="primary"
-          fullWidth
-          sx={{ mt: 2 }}
-        >
-          Login
-        </Button>
-      </Box>
+          {/* Password Input */}
+          <TextField
+            fullWidth
+            label="Password"
+            name="password"
+            type="password"
+            value={formData.password}
+            onChange={handleChange}
+            margin="normal"
+            required
+          />
 
-      {/* Link to Register */}
-      <Box sx={{ mt: 2, textAlign: "center" }}>
-        <Typography variant="body2">
-          Don't Have an Account? <Link to="/register">Register</Link>
-        </Typography>
-      </Box>
+          {/* Role Selection */}
+          <FormLabel sx={{ mt: 2 }}>Select Role</FormLabel>
+          <RadioGroup row value={formData.role} onChange={handleRoleChange}>
+            <FormControlLabel
+              value="mainAdmin"
+              control={<Radio />}
+              label="Main Admin"
+            />
+          </RadioGroup>
+
+          {/* Submit Button */}
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            fullWidth
+            sx={{ mt: 2 }}
+          >
+            Login
+          </Button>
+        </Box>
+
+        {/* Link to Register */}
+        <Box sx={{ mt: 2 }}>
+          <Typography variant="body2">
+            Don't Have an Account? <Link to="/register">Register</Link>
+          </Typography>
+        </Box>
+      </Paper>
     </Container>
   );
 };

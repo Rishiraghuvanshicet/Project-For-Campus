@@ -18,12 +18,13 @@ import { useNavigate } from "react-router-dom";
 
 const Register = () => {
   const navigate = useNavigate();
+  const [cvUploading, setCvUploading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
     role: "student",
-    collegeId: "",
+    registrationNumber: "",
     cv: "",
   });
 
@@ -35,6 +36,7 @@ const Register = () => {
     const file = e.target.files[0];
     if (!file) return;
 
+    setCvUploading(true);
     const cvFormData = new FormData();
     cvFormData.append("file", file);
     cvFormData.append("upload_preset", "CHANDAN-SRMS");
@@ -51,12 +53,27 @@ const Register = () => {
       toast.success("CV uploaded successfully!");
     } catch (error) {
       toast.error("CV upload failed!");
+    } finally {
+      setCvUploading(false); // Reset uploading state
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Email validation
+    if (!formData.email.endsWith("@gmail.com")) {
+      toast.error("Email must be a Gmail account (example@gmail.com)!");
+      return;
+    }
+
+    // Password validation
+    if (formData.password.length < 6) {
+      toast.error("Password must be at least 6 characters long!");
+      return;
+    }
+
+    // CV validation for students
     if (formData.role === "student" && !formData.cv) {
       toast.error("Please upload your CV before registering!");
       return;
@@ -79,40 +96,96 @@ const Register = () => {
       <Container maxWidth="sm">
         <ToastContainer position="top-right" autoClose={3000} />
         <Box sx={styles.formContainer}>
-          <Typography variant="h4" sx={{ mb: 2, fontWeight: "bold", color: "#333" }}>
+          <Typography
+            variant="h4"
+            sx={{ mb: 2, fontWeight: "bold", color: "#333" }}
+          >
             Register
           </Typography>
           <Box component="form" onSubmit={handleSubmit}>
-            <TextField fullWidth label="Full Name" name="name" value={formData.name} onChange={handleChange} margin="normal" required />
-            <TextField fullWidth type="email" label="Email" name="email" value={formData.email} onChange={handleChange} margin="normal" required />
-            <TextField fullWidth type="password" label="Password" name="password" value={formData.password} onChange={handleChange} margin="normal" required />
-            
+            <TextField
+              fullWidth
+              label="Full Name"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              margin="normal"
+              required
+            />
+            <TextField
+              fullWidth
+              type="email"
+              label="Email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              margin="normal"
+              required
+            />
+            <TextField
+              fullWidth
+              type="password"
+              label="Password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              margin="normal"
+              required
+            />
             <Box sx={{ display: "flex", alignItems: "center", gap: 2, mt: 2 }}>
               <FormLabel component="legend">Select Role:</FormLabel>
-              <RadioGroup row name="role" value={formData.role} onChange={handleChange}>
-                <FormControlLabel value="collegeAdmin" control={<Radio />} label="College Admin" />
-                <FormControlLabel value="student" control={<Radio />} label="Student" />
+              <RadioGroup
+                row
+                name="role"
+                value={formData.role}
+                onChange={handleChange}
+              >
+                <FormControlLabel
+                  value="student"
+                  control={<Radio />}
+                  label="Student"
+                />
               </RadioGroup>
             </Box>
-
-            {(formData.role === "collegeAdmin" || formData.role === "student") && (
-              <TextField fullWidth label="College ID" name="collegeId" value={formData.collegeId} onChange={handleChange} margin="normal" required />
+            {(formData.role === "collegeAdmin" ||
+              formData.role === "student") && (
+              <TextField
+                fullWidth
+                label="College ID"
+                name="registrationNumber"
+                value={formData.registrationNumber}
+                onChange={handleChange}
+                margin="normal"
+                required
+              />
             )}
-            
             {formData.role === "student" && (
               <Box sx={styles.cvUploadContainer}>
                 <Typography variant="body1">Upload CV (PDF Only)</Typography>
-                <Input type="file" accept="application/pdf" onChange={handleFileChange} required />
+                <Input
+                  type="file"
+                  accept="application/pdf"
+                  onChange={handleFileChange}
+                  required
+                />
               </Box>
             )}
-
-            <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2 }}>
-              Register
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              fullWidth
+              sx={{ mt: 2 }}
+              disabled={cvUploading} // Disable button during CV upload
+            >
+              {cvUploading ? "Uploading CV..." : "Register"}
             </Button>
             
             <Typography sx={{ mt: 2, textAlign: "center" }}>
               Already have an account?{" "}
-              <span onClick={() => navigate("/")} style={styles.link}>Login</span>
+              <span onClick={() => navigate("/")} style={styles.link}>
+                Login
+              </span>
             </Typography>
           </Box>
         </Box>
@@ -127,7 +200,8 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
     minHeight: "100vh",
-    backgroundImage: "url('https://snckollam.ac.in/kezoofti/2019/10/campus-placement.jpg')",
+    backgroundImage:
+      "url('https://snckollam.ac.in/kezoofti/2019/10/campus-placement.jpg')",
     backgroundSize: "cover",
     backgroundPosition: "center",
     backgroundAttachment: "fixed",

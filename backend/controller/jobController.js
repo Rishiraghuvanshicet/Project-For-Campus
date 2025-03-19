@@ -36,7 +36,7 @@ const getJobsByCollege = async (req, res) => {
     }
 
     const jobs = await Job.find({ collegeId: req.user.collegeId });
-    console.log("Jobs Found:", jobs);
+
     res.status(200).json(jobs);
   } catch (error) {
     console.error("Error fetching jobs:", error);
