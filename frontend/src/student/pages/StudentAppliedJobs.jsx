@@ -34,7 +34,6 @@ const StudentAppliedJobs = () => {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-
         if (response.status === 200) {
           if (response.data.length === 0) {
             setJobs([]); // No jobs applied
@@ -108,7 +107,7 @@ const StudentAppliedJobs = () => {
                 {jobs.map((job) => (
                   <TableRow key={job._id}>
                     <TableCell>{job.jobId?.title || "N/A"}</TableCell>
-                    <TableCell>{job.jobId?.company || "N/A"}</TableCell>
+                    <TableCell>{job.jobId?.companyName || "N/A"}</TableCell>
                     <TableCell>{job.status}</TableCell>
                     <TableCell>{new Date(job.createdAt).toLocaleDateString()}</TableCell>
                   </TableRow>

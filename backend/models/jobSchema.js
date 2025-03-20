@@ -6,6 +6,7 @@ const jobSchema = new mongoose.Schema({
   location:{ type: String, required: true},
   requirements: [{ type: String }],
   salary:{ type: Number, required: true},
+  companyName: { type: String, required: true },
   postedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   collegeId: { type: mongoose.Schema.Types.ObjectId, ref: "College", required: true },
   createdAt: { type: Date, default: Date.now },

@@ -100,26 +100,135 @@ const RegisterCollege = () => {
       <ToastContainer position="top-right" autoClose={1500} />
 
       {step === 1 ? (
-        <Box sx={{ mt: 5, textAlign: "center" }}>
-          <Typography variant="h4">Register College</Typography>
-          <Box component="form" onSubmit={registerCollege} sx={{ mt: 3 }}>
-            <TextField fullWidth label="College Name" name="name" value={collegeData.name} onChange={handleCollegeChange} margin="normal" required />
-            <TextField fullWidth label="Registration Number" name="registrationNumber" value={collegeData.registrationNumber} onChange={handleCollegeChange} margin="normal" required />
-            <TextField fullWidth label="Location" name="location" value={collegeData.location} onChange={handleCollegeChange} margin="normal" required />
-            <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2 }}>
+        <Box
+          sx={{
+            mt: 5,
+            textAlign: "center",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            flexDirection: "column",
+            boxShadow: 3, // Adds box shadow
+            borderRadius: 2, // Optional: Adds rounded corners
+            padding: 3,
+            backgroundColor: "white", // Optional: Adds a white background
+          }}
+        >
+          <Typography variant="h4" gutterBottom>
+            Register College
+          </Typography>
+          <Box component="form" onSubmit={registerCollege} sx={{ width: "100%" }}>
+            <TextField
+              fullWidth
+              label="College Name"
+              name="name"
+              value={collegeData.name}
+              onChange={handleCollegeChange}
+              margin="normal"
+              required
+            />
+            <TextField
+              fullWidth
+              label="Registration Number"
+              name="registrationNumber"
+              value={collegeData.registrationNumber}
+              onChange={handleCollegeChange}
+              margin="normal"
+              required
+            />
+            <TextField
+              fullWidth
+              label="Location"
+              name="location"
+              value={collegeData.location}
+              onChange={handleCollegeChange}
+              margin="normal"
+              required
+            />
+            <Button
+              type="submit"
+              variant="contained"
+              sx={{
+                mt: 2,
+                backgroundColor: "#6a1b9a", // Purple color
+                "&:hover": {
+                  backgroundColor: "#8e24aa", // Lighter purple on hover
+                },
+              }}
+              fullWidth
+            >
               Register College
             </Button>
           </Box>
         </Box>
       ) : (
-        <Box sx={{ mt: 5, textAlign: "center" }}>
-          <Typography variant="h4">Register College Admin</Typography>
-          <Box component="form" onSubmit={registerCollegeAdmin} sx={{ mt: 3 }}>
-            <TextField fullWidth label="Admin Name" name="name" value={adminData.name} onChange={handleAdminChange} margin="normal" required />
-            <TextField fullWidth label="Admin Email" name="email" type="email" value={adminData.email} onChange={handleAdminChange} margin="normal" required />
-            <TextField fullWidth label="Admin Password" name="password" type="password" value={adminData.password} onChange={handleAdminChange} margin="normal" required />
-            <TextField fullWidth label="College Registration Number" name="registrationNumber" value={adminData.registrationNumber} margin="normal" disabled />
-            <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2 }}>
+        <Box
+          sx={{
+            mt: 5,
+            textAlign: "center",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            flexDirection: "column",
+            boxShadow: 3,
+            borderRadius: 2,
+            padding: 3,
+            backgroundColor: "white",
+          }}
+        >
+          <Typography variant="h4" gutterBottom>
+            Register College Admin
+          </Typography>
+          <Box component="form" onSubmit={registerCollegeAdmin} sx={{ width: "100%" }}>
+            <TextField
+              fullWidth
+              label="Admin Name"
+              name="name"
+              value={adminData.name}
+              onChange={handleAdminChange}
+              margin="normal"
+              required
+            />
+            <TextField
+              fullWidth
+              label="Admin Email"
+              name="email"
+              type="email"
+              value={adminData.email}
+              onChange={handleAdminChange}
+              margin="normal"
+              required
+            />
+            <TextField
+              fullWidth
+              label="Admin Password"
+              name="password"
+              type="password"
+              value={adminData.password}
+              onChange={handleAdminChange}
+              margin="normal"
+              required
+            />
+            <TextField
+              fullWidth
+              label="College Registration Number"
+              name="registrationNumber"
+              value={adminData.registrationNumber}
+              margin="normal"
+              disabled
+            />
+            <Button
+              type="submit"
+              variant="contained"
+              sx={{
+                mt: 2,
+                backgroundColor: "#6a1b9a",
+                "&:hover": {
+                  backgroundColor: "#8e24aa",
+                },
+              }}
+              fullWidth
+            >
               Register College Admin
             </Button>
           </Box>

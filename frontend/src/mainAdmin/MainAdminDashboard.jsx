@@ -95,8 +95,14 @@ const MainAdminDashboard = () => {
       <Box sx={{ textAlign: "right", mb: 2 }}>
         <Button
           variant="contained"
-          color="primary"
           onClick={() => navigate("/main-admin/register-college")}
+          sx={{
+            mt: 2,
+            backgroundColor: "#6a1b9a", // Purple color
+            "&:hover": {
+              backgroundColor: "#8e24aa", // Lighter purple on hover
+            },
+          }}
         >
           Register College
         </Button>

@@ -68,7 +68,7 @@ const getApplicantsByJob = async (req, res) => {
 const getAppliedJobsByStudent = async (req, res) => {
   try {
     const studentId = req.user._id;
-    const appliedJobs = await Application.find({ studentId }).populate("jobId", "title description");
+    const appliedJobs = await Application.find({ studentId }).populate("jobId", "title description companyName");
     
     if (!appliedJobs.length) {
       return res.status(404).json({ message: "No Applications", success: false });

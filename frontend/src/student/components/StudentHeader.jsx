@@ -9,8 +9,8 @@ const StudentHeader = () => {
   // Determine active page based on the current route
   const getActivePage = () => {
     if (location.pathname === "/student-dashboard") return "home";
-    if (location.pathname === "/jobs") return "applied-jobs";
-    if (location.pathname === "/student-dashboard/applied-jobs") return "status";
+    if (location.pathname === "/student-dashboard/applied-jobs") return "applied-jobs";
+    if (location.pathname === "/student-dashboard") return "status";
     return "";
   };
 

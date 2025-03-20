@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Container, Typography, Button, Box } from "@mui/material";
+import { Container, Typography, Box, RadioGroup, FormControlLabel, Radio, FormControl } from "@mui/material";
 import CardList from "../components/CardList";
 import StudentHeader from "../components/StudentHeader";
 
@@ -9,12 +9,13 @@ const StudentDashboard = () => {
   const [jobs, setJobs] = useState([]);
   const [appliedJobs, setAppliedJobs] = useState([]);
   const [cvUrl, setCvUrl] = useState(""); // Store student's CV URL
+  const [filter, setFilter] = useState("All"); // New state for filter
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchJobs();
     fetchStudentProfile(); 
-    fetchAppliedJobs();// Fetch student's CV
+    fetchAppliedJobs(); // Fetch student's CV
   }, []);
 
   const fetchJobs = async () => {
@@ -35,7 +36,6 @@ const StudentDashboard = () => {
       const response = await axios.get("http://localhost:4000/api/v1/application/getAppliedJobs", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log("hii2")
       setAppliedJobs(response.data.map((app) => app.jobId._id)); // Store applied job IDs
     } catch (error) {
       console.error("Error fetching applied jobs:", error);
@@ -48,7 +48,6 @@ const StudentDashboard = () => {
       const response = await axios.get("http://localhost:4000/api/v1/user/profile", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log(response.data.cv)
       setCvUrl(response.data.cv || ""); // Store CV URL
     } catch (error) {
       console.error("Error fetching student profile:", error);
@@ -78,34 +77,37 @@ const StudentDashboard = () => {
     }
   };
 
+  const handleFilterChange = (event) => {
+    setFilter(event.target.value); // Set the selected filter
+  };
+
+  // Filter jobs based on the selected category
+  const filteredJobs = filter === "All" ? jobs : jobs.filter((job) => job.title === filter);
+
   return (
     <>
-    <StudentHeader/>
-    <Container maxWidth="lg" sx={{marginTop:"100px"}}>
-      <Box sx={{ mt: 5, display: "flex", justifyContent: "space-between" }}>
-        <Typography variant="h4" sx={{ fontWeight: "bold" }}>
-          Student Dashboard
-        </Typography>
-      </Box>
+      <StudentHeader />
+      <Container maxWidth="lg" sx={{ marginTop: "100px", display: "flex", gap: 4}}>
+        {/* Left Section - Filter Options */}
+        <Box sx={{ width: "20%", textAlign: "center" }}>
+          <Typography variant="h6" sx={{ fontWeight: "bold", mb: 2 }}>Filter Jobs</Typography>
+          <FormControl component="fieldset">
+            <RadioGroup value={filter} onChange={handleFilterChange} sx={{ display: "flex"}}>
+              <FormControlLabel value="All" control={<Radio />} label="All" />
+              <FormControlLabel value="Frontend" control={<Radio />} label="Frontend" />
+              <FormControlLabel value="backend" control={<Radio />} label="Backend" />
+              <FormControlLabel value="UI/UX" control={<Radio />} label="UI/UX" />
+              <FormControlLabel value="Data Science" control={<Radio />} label="Data Science" />
+            </RadioGroup>
+          </FormControl>
+        </Box>
 
-      <Box sx={{ textAlign: "center", mt: 3 }}>
-        <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-          Jobs Applied: {appliedJobs.length}
-        </Typography>
-      </Box>
-
-      <Box sx={{ mt: 4 }}>
-        <Typography variant="h5" gutterBottom sx={{ fontWeight: "bold", mb: 2 }}>
-          Available Jobs
-        </Typography>
-
-        <CardList
-          jobs={jobs}
-          appliedJobs={appliedJobs}
-          applyForJob={applyForJob}
-        />
-      </Box>
-    </Container>
+        {/* Right Section - Job Listings */}
+        <Box sx={{ width: "80%" }}>
+          <Typography variant="h5" gutterBottom sx={{ fontWeight: "bold", mb: 2 }}>Available Jobs</Typography>
+          <CardList jobs={filteredJobs} appliedJobs={appliedJobs} applyForJob={applyForJob} />
+        </Box>
+      </Container>
     </>
   );
 };

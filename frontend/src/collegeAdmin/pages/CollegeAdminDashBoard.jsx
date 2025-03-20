@@ -71,7 +71,7 @@ const CollegeAdminDashBoard = () => {
     <Container maxWidth="sm"> {/* Reduced maxWidth for better form alignment */}
       <Box sx={{ mt: 8, display: "flex", flexDirection: "column", alignItems: "center" }}>
         <Typography variant="h4" gutterBottom sx={{ textAlign: "center", fontWeight: "bold" }}>
-          College Admin Dashboard
+          <b>College Admin Dashboard</b>
         </Typography>
 
         <Paper elevation={3} sx={{ p: 4, width: "100%", textAlign: "center", borderRadius: 2 }}>

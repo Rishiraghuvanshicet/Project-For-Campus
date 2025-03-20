@@ -19,6 +19,7 @@ const CollegeAdminPostJob = () => {
     requirements: "",
     location: "",
     salary: "",
+    companyName: "",
   });
 
   const handleChange = (e) => {
@@ -39,6 +40,7 @@ const CollegeAdminPostJob = () => {
         requirements: "",
         location: "",
         salary: "",
+        companyName: "",
       });
     } catch (error) {
       toast.error("Failed to post job!");
@@ -51,7 +53,7 @@ const CollegeAdminPostJob = () => {
       <Container maxWidth="sm">
         <ToastContainer position="top-right" autoClose={3000} />
         <Box sx={{ mt: 5, textAlign: "center" }}>
-          <Typography variant="h4">Post a New Job</Typography>
+          <Typography variant="h4"><b>Post a New Job</b></Typography>
         </Box>
         <Paper elevation={3} sx={{ p: 3 }}>
           <form onSubmit={handleSubmit}>
@@ -98,6 +100,15 @@ const CollegeAdminPostJob = () => {
               label="Salary"
               name="salary"
               value={formData.salary}
+              onChange={handleChange}
+              margin="normal"
+              required
+            />{" "}
+            <TextField
+              fullWidth
+              label="Company Name" // Added company name field
+              name="companyName"
+              value={formData.companyName}
               onChange={handleChange}
               margin="normal"
               required

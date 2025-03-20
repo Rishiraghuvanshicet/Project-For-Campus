@@ -31,6 +31,9 @@ const JobCard = ({ job, appliedJobs, applyForJob }) => {
           {job.description}
         </Typography>
         <Typography variant="body2" sx={{ mt: 1 }}>
+          <strong>Company:</strong> {job.companyName}
+        </Typography>
+        <Typography variant="body2" sx={{ mt: 1 }}>
           <strong>Location:</strong> {job.location}
         </Typography>
         <Typography variant="body2" sx={{ mt: 1 }}>

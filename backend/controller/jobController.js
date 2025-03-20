@@ -7,8 +7,8 @@ const createJob = async (req, res) => {
       return res.status(403).json({ message: "Access denied" });
     }
 
-    const { title, description, location, requirements, salary } = req.body;
-    if (!title || !description || !requirements || !location) {
+    const { title, description, location, requirements, salary, companyName } = req.body;
+    if (!title || !description || !requirements || !location  || !salary || !companyName) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -18,6 +18,7 @@ const createJob = async (req, res) => {
       location,
       requirements,
       salary,
+      companyName,
       postedBy: req.user._id,
       collegeId: req.user.collegeId,
     });

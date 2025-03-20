@@ -86,7 +86,7 @@ const CollegeAdminViewApplicants = () => {
       <Container maxWidth="md">
         <ToastContainer position="top-right" autoClose={1000} />
         <Box sx={{ mt: 5, textAlign: "center" }}>
-          <Typography variant="h4">Jobs Posted by College</Typography>
+          <Typography variant="h4"><b>Jobs Posted by College</b></Typography>
           <Typography variant="h6" sx={{ mt: 2, color: "gray" }}>
             Total Jobs: {jobs.length}
           </Typography>
