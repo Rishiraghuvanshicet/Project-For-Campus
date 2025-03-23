@@ -2,12 +2,16 @@ const User = require("../models/userSchema");
 const College = require("../models/collegeSchema"); // Import College model
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { sendOTP } = require("../config/nodemailer");
 
+// Temporary storage for OTP (Ideally, use a DB or session storage for better security)
+let storedOTP = ""; // You can store this in the database or session for real-world apps
+let otpExpirationTime = Date.now() + 10 * 60 * 1000; // OTP expires in 10 minutes
 
 const register = async (req, res) => {
   try {
     let { name, email, password, role, registrationNumber, cv } = req.body;
-    console.log(registrationNumber)
+    console.log(registrationNumber);
     // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -53,7 +57,6 @@ const register = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-
 
 const login = async (req, res) => {
   try {
@@ -154,6 +157,52 @@ const uploadCV = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+const requestOTP = async (req, res) => {
+  const { email } = req.body;
 
+  // Validate email format
+  if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
+    return res.status(400).json({ message: "Invalid email format" });
+  }
 
-module.exports = { register, login, logout, getAllUsers, getUserProfile, uploadCV };
+  try {
+    // Send OTP to the email and store it temporarily
+    storedOTP = await sendOTP(email);
+    otpExpirationTime = Date.now() + 10 * 60 * 1000; // Reset OTP expiration time
+
+    res.status(200).json({ message: "OTP sent to your email" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Handle OTP verification
+const verifyOTP = (req, res) => {
+  const { otp } = req.body;
+
+  // Check if OTP is expired
+  if (Date.now() > otpExpirationTime) {
+    return res
+      .status(400)
+      .json({ message: "OTP has expired. Please request a new one." });
+  }
+
+  // Check if the entered OTP matches the stored OTP
+  if (otp === storedOTP) {
+    // OTP is correct, proceed with the verification process
+    return res.status(200).json({ message: "OTP verified successfully" });
+  } else {
+    return res.status(400).json({ message: "Invalid OTP" });
+  }
+};
+
+module.exports = {
+  register,
+  verifyOTP,
+  requestOTP,
+  login,
+  logout,
+  getAllUsers,
+  getUserProfile,
+  uploadCV,
+};

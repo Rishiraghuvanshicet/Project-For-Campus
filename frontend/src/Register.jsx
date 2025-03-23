@@ -1,18 +1,6 @@
 import React, { useState } from "react";
-import {
-  Container,
-  TextField,
-  Button,
-  Typography,
-  Box,
-  Radio,
-  RadioGroup,
-  FormControlLabel,
-  FormLabel,
-  Input,
-} from "@mui/material";
+import { Container, TextField, Button, Typography, Box, Radio, RadioGroup, FormControlLabel, FormLabel, Input } from "@mui/material";
 import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -26,7 +14,10 @@ const Register = () => {
     role: "student",
     registrationNumber: "",
     cv: "",
+    otp: "",
   });
+  const [otpSent, setOtpSent] = useState(false); // New state for OTP sent status
+  const [otpError, setOtpError] = useState(false); // State to handle OTP verification error
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -42,10 +33,7 @@ const Register = () => {
     cvFormData.append("upload_preset", "CHANDAN-SRMS");
 
     try {
-      const response = await axios.post(
-        "https://api.cloudinary.com/v1_1/dx4ctlu0h/upload",
-        cvFormData
-      );
+      const response = await axios.post("https://api.cloudinary.com/v1_1/dx4ctlu0h/upload", cvFormData);
       setFormData((prevFormData) => ({
         ...prevFormData,
         cv: response.data.secure_url,
@@ -54,7 +42,7 @@ const Register = () => {
     } catch (error) {
       toast.error("CV upload failed!");
     } finally {
-      setCvUploading(false); // Reset uploading state
+      setCvUploading(false);
     }
   };
 
@@ -80,14 +68,33 @@ const Register = () => {
     }
 
     try {
-      const response = await axios.post(
-        "http://localhost:4000/api/v1/user/register",
-        formData
-      );
-      toast.success(response.data.message);
-      setTimeout(() => navigate("/"), 1500);
+      if (!otpSent) {
+        // Step 1: Send OTP to the email
+        const response = await axios.post("http://localhost:4000/api/v1/user/request-otp", { email: formData.email });
+        
+        // If OTP is sent successfully
+        toast.success(response.data.message);
+        setOtpSent(true);
+      } else {
+        // Step 2: Verify OTP
+        const response = await axios.post("http://localhost:4000/api/v1/user/verify-otp", { email: formData.email, otp: formData.otp });
+        
+        // If OTP verification is successful, proceed with registration
+        toast.success(response.data.message);
+        
+        // Proceed to register the user
+        const registrationResponse = await axios.post("http://localhost:4000/api/v1/user/register", formData);
+        toast.success(registrationResponse.data.message);
+        
+        // Redirect to home page after successful registration
+        setTimeout(() => navigate("/"), 1500);
+      }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Registration failed!");
+      if (otpSent && error.response?.data?.message === "Invalid OTP") {
+        setOtpError(true);  // Handle incorrect OTP
+      } else {
+        toast.error(error.response?.data?.message || "Registration failed!");
+      }
     }
   };
 
@@ -96,13 +103,11 @@ const Register = () => {
       <Container maxWidth="sm">
         <ToastContainer position="top-right" autoClose={3000} />
         <Box sx={styles.formContainer}>
-          <Typography
-            variant="h4"
-            sx={{ mb: 2, fontWeight: "bold", color: "#333" }}
-          >
+          <Typography variant="h4" sx={{ mb: 2, fontWeight: "bold", color: "#333" }}>
             Register
           </Typography>
           <Box component="form" onSubmit={handleSubmit}>
+            {/* Form fields */}
             <TextField
               fullWidth
               label="Full Name"
@@ -134,21 +139,11 @@ const Register = () => {
             />
             <Box sx={{ display: "flex", alignItems: "center", gap: 2, mt: 2 }}>
               <FormLabel component="legend">Select Role:</FormLabel>
-              <RadioGroup
-                row
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-              >
-                <FormControlLabel
-                  value="student"
-                  control={<Radio />}
-                  label="Student"
-                />
+              <RadioGroup row name="role" value={formData.role} onChange={handleChange}>
+                <FormControlLabel value="student" control={<Radio />} label="Student" />
               </RadioGroup>
             </Box>
-            {(formData.role === "collegeAdmin" ||
-              formData.role === "student") && (
+            {(formData.role === "collegeAdmin" || formData.role === "student") && (
               <TextField
                 fullWidth
                 label="College ID"
@@ -162,25 +157,25 @@ const Register = () => {
             {formData.role === "student" && (
               <Box sx={styles.cvUploadContainer}>
                 <Typography variant="body1">Upload CV (PDF Only)</Typography>
-                <Input
-                  type="file"
-                  accept="application/pdf"
-                  onChange={handleFileChange}
-                  required
-                />
+                <Input type="file" accept="application/pdf" onChange={handleFileChange} required />
               </Box>
             )}
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              fullWidth
-              sx={{ mt: 2 }}
-              disabled={cvUploading} // Disable button during CV upload
-            >
-              {cvUploading ? "Uploading CV..." : "Register"}
+            {otpSent && (
+              <TextField
+                fullWidth
+                label="Enter OTP"
+                name="otp"
+                value={formData.otp}
+                onChange={handleChange}
+                margin="normal"
+                required
+                error={otpError}  // Highlight error if OTP is incorrect
+                helperText={otpError && "Incorrect OTP, please try again!"}
+              />
+            )}
+            <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2 }} disabled={cvUploading}>
+              {otpSent ? "Verify OTP" : "Register"}
             </Button>
-            
             <Typography sx={{ mt: 2, textAlign: "center" }}>
               Already have an account?{" "}
               <span onClick={() => navigate("/")} style={styles.link}>

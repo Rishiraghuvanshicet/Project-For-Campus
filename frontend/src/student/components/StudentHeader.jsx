@@ -1,10 +1,36 @@
 import React, { useState } from "react";
-import { AppBar, Toolbar, Typography, Button, Box } from "@mui/material";
+import { AppBar, Toolbar, Typography, Button, Box, Menu, MenuItem, IconButton } from "@mui/material";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import AccountCircleIcon from '@mui/icons-material/AccountCircle'; // Import the user icon
 
 const StudentHeader = () => {
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Dropdown menu state
+  const [anchorEl, setAnchorEl] = useState(null);
+  const openMenu = Boolean(anchorEl);
+
+  // Handle Menu Open and Close
+  const handleMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  // Handle Logout
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/");
+  };
+
+  // Handle Edit Profile
+  const handleEditProfile = () => {
+    navigate("/student-dashboard/editprofile");
+    handleMenuClose(); // Close the menu after redirect
+  };
 
   // Determine active page based on the current route
   const getActivePage = () => {
@@ -16,11 +42,6 @@ const StudentHeader = () => {
 
   const [activePage, setActivePage] = useState(getActivePage());
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/");
-  };
-
   return (
     <AppBar
       position="static"
@@ -31,7 +52,6 @@ const StudentHeader = () => {
       }}
     >
       <Toolbar sx={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap" }}>
-        
         <Typography variant="h6" sx={{ fontFamily: "Times New Roman, serif", fontWeight: "bold" }}>
           <span style={{ color: "black" }}>Campus</span>{" "}
           <span style={{ color: "orangered" }}>Recruitment</span>{" "}
@@ -66,10 +86,23 @@ const StudentHeader = () => {
           </Button>
         </Box>
 
-        {/* Logout Button */}
-        <Button variant="contained" color="error" onClick={handleLogout}>
-          Logout
-        </Button>
+        {/* User Profile Dropdown */}
+        <IconButton
+          onClick={handleMenuOpen}
+          sx={{ color: "black" }}
+        >
+          <AccountCircleIcon />
+        </IconButton>
+
+        {/* Menu for Edit Profile and Logout */}
+        <Menu
+          anchorEl={anchorEl}
+          open={openMenu}
+          onClose={handleMenuClose}
+        >
+          <MenuItem onClick={handleEditProfile}>Edit Profile</MenuItem>
+          <MenuItem onClick={handleLogout}>Logout</MenuItem>
+        </Menu>
       </Toolbar>
     </AppBar>
   );

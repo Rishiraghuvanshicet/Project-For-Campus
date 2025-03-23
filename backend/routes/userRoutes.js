@@ -6,6 +6,8 @@ const {
   getAllUsers,
   getUserProfile,
   uploadCV,
+  requestOTP, 
+  verifyOTP
 } = require("../controller/userController");
 
 const { upload } = require("../config/cloudinary");
@@ -21,5 +23,10 @@ router.get("/profile", authMiddleware, getUserProfile);
 router.get("/all", authMiddleware, getAllUsers);
 
 router.post("/upload-cv", authMiddleware, upload.single("cv"), uploadCV);
+
+// Route for requesting OTP
+router.post("/request-otp", requestOTP);
+// Route for verifying OTP
+router.post("/verify-otp", verifyOTP);
 
 module.exports = router;

@@ -15,6 +15,8 @@ import StudentDashboard from "./student/pages/StudentDashboard";
 import StudentJobView from "./student/pages/StudentJobView";
 import CollegeAdminApplicants from "./collegeAdmin/pages/CollegeAdminApplicants";
 import StudentAppliedJobs from "./student/pages/StudentAppliedJobs";
+import StudentEditProfile from "./student/pages/StudentEditProfile";
+import CollegeAdminEditProfile from "./collegeAdmin/pages/CollegeAdminEditProfile";
 
 const App = () => {
   return (
@@ -31,12 +33,14 @@ const App = () => {
         <Route path="/register" element={<Register/>}/>
         <Route path="/college-admin-home-page" element={<CollegeAdminHomePage/>}/>
         <Route path="/college-admin-dashboard" element={<CollegeAdminDashBoard />} />
+        <Route path="/college-admin-dashboard/college-admin-edit-profile" element={<CollegeAdminEditProfile/>}/>
         <Route path="/college-admin-post-job" element={<CollegeAdminPostJob />} />
         <Route path="/college-admin-applicants" element={<CollegeAdminViewApplicants />} />
-        <Route path="/student-dashboard" element={<StudentDashboard/>} />
-        <Route path="/student-job-view" element={<StudentJobView/>} />
         <Route path="/college-admin-Students-applicants" element={<CollegeAdminApplicants/>}/>
+        <Route path="/student-dashboard" element={<StudentDashboard/>} />
+        {/* <Route path="/student-job-view" element={<StudentJobView/>} /> */}
         <Route path="/student-dashboard/applied-jobs" element={<StudentAppliedJobs/>}/>
+        <Route path="/student-dashboard/editprofile" element={<StudentEditProfile/>}/>
       </Routes>
     </Router>
   );

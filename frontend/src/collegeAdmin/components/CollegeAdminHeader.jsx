@@ -1,10 +1,12 @@
 import React, { useState } from "react";
-import { AppBar, Toolbar, Typography, Button, Box } from "@mui/material";
+import { AppBar, Toolbar, Typography, Button, Box, Menu, MenuItem, IconButton } from "@mui/material";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import AccountCircleIcon from '@mui/icons-material/AccountCircle'; 
 
 const CollegeAdminHeader = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [anchorEl, setAnchorEl] = useState(null);
 
   // Determine active page based on the current route
   const getActivePage = () => {
@@ -21,6 +23,14 @@ const CollegeAdminHeader = () => {
   const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/");
+  };
+
+  const handleMenuClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
   };
 
   return (
@@ -40,54 +50,39 @@ const CollegeAdminHeader = () => {
         </Typography>
 
         {/* Navigation Links */}
-        
         <Box sx={{ display: "flex", gap: 3, justifyContent: "center", flexGrow: 1 }}>
-        <Button
-            sx={{ color: activePage === "home" ? "orangered" : "black" }}
-            component={Link}
-            to="/college-admin-home-page"
-            onClick={() => setActivePage("home")}
-          >
+          <Button sx={{ color: activePage === "home" ? "orangered" : "black" }} component={Link} to="/college-admin-home-page" onClick={() => setActivePage("home")}>
             Home
           </Button>
-          <Button
-            sx={{ color: activePage === "dashboard" ? "orangered" : "black" }}
-            component={Link}
-            to="/college-admin-dashboard"
-            onClick={() => setActivePage("dashboard")}
-          >
+          <Button sx={{ color: activePage === "dashboard" ? "orangered" : "black" }} component={Link} to="/college-admin-dashboard" onClick={() => setActivePage("dashboard")}>
             Dashboard
           </Button>
-          <Button
-            sx={{ color: activePage === "post-job" ? "orangered" : "black" }}
-            component={Link}
-            to="/college-admin-post-job"
-            onClick={() => setActivePage("post-job")}
-          >
+          <Button sx={{ color: activePage === "post-job" ? "orangered" : "black" }} component={Link} to="/college-admin-post-job" onClick={() => setActivePage("post-job")}>
             Post a Job
           </Button>
-          <Button
-            sx={{ color: activePage === "view-jobs" ? "orangered" : "black" }}
-            component={Link}
-            to="/college-admin-applicants"
-            onClick={() => setActivePage("view-jobs")}
-          >
+          <Button sx={{ color: activePage === "view-jobs" ? "orangered" : "black" }} component={Link} to="/college-admin-applicants" onClick={() => setActivePage("view-jobs")}>
             View Jobs
           </Button>
-          <Button
-            sx={{ color: activePage === "students-applied" ? "orangered" : "black" }}
-            component={Link}
-            to="/college-admin-Students-applicants"
-            onClick={() => setActivePage("students-applied")}
-          >
+          <Button sx={{ color: activePage === "students-applied" ? "orangered" : "black" }} component={Link} to="/college-admin-Students-applicants" onClick={() => setActivePage("students-applied")}>
             Students Applied
           </Button>
         </Box>
 
-        {/* Logout Button */}
-        <Button variant="contained" color="error" onClick={handleLogout}>
-          Logout
-        </Button>
+        {/* Dropdown Menu for Edit Profile and Logout */}
+        <Box>
+        <IconButton
+          onClick={handleMenuClick}
+          sx={{ color: "black" }}
+        >
+          <AccountCircleIcon />
+        </IconButton>
+          <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
+            <MenuItem onClick={() => { navigate("/college-admin-dashboard/college-admin-edit-profile"); handleMenuClose(); }}>
+              Edit Profile
+            </MenuItem>
+            <MenuItem onClick={handleLogout}>Logout</MenuItem>
+          </Menu>
+        </Box>
       </Toolbar>
     </AppBar>
   );
