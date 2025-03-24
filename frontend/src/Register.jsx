@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Container, TextField, Button, Typography, Box, Radio, RadioGroup, FormControlLabel, FormLabel, Input } from "@mui/material";
+import { Container, TextField, Button, Typography, Box, Input } from "@mui/material";
 import { toast, ToastContainer } from "react-toastify";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -7,20 +7,21 @@ import { useNavigate } from "react-router-dom";
 const Register = () => {
   const navigate = useNavigate();
   const [cvUploading, setCvUploading] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpVerified, setOtpVerified] = useState(false);
+  const [otpError, setOtpError] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    password: "",
-    role: "student",
+    otp: "",
     registrationNumber: "",
     cv: "",
-    otp: "",
   });
-  const [otpSent, setOtpSent] = useState(false); // New state for OTP sent status
-  const [otpError, setOtpError] = useState(false); // State to handle OTP verification error
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    if (name === "otp") setOtpError(false);
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleFileChange = async (e) => {
@@ -34,10 +35,7 @@ const Register = () => {
 
     try {
       const response = await axios.post("https://api.cloudinary.com/v1_1/dx4ctlu0h/upload", cvFormData);
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        cv: response.data.secure_url,
-      }));
+      setFormData((prevFormData) => ({ ...prevFormData, cv: response.data.secure_url }));
       toast.success("CV uploaded successfully!");
     } catch (error) {
       toast.error("CV upload failed!");
@@ -49,52 +47,33 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Email validation
-    if (!formData.email.endsWith("@gmail.com")) {
-      toast.error("Email must be a Gmail account (example@gmail.com)!");
-      return;
-    }
-
-    // Password validation
-    if (formData.password.length < 6) {
-      toast.error("Password must be at least 6 characters long!");
-      return;
-    }
-
-    // CV validation for students
-    if (formData.role === "student" && !formData.cv) {
-      toast.error("Please upload your CV before registering!");
-      return;
-    }
-
     try {
       if (!otpSent) {
-        // Step 1: Send OTP to the email
         const response = await axios.post("http://localhost:4000/api/v1/user/request-otp", { email: formData.email });
-        
-        // If OTP is sent successfully
         toast.success(response.data.message);
         setOtpSent(true);
-      } else {
-        // Step 2: Verify OTP
+      } else if (!otpVerified) {
         const response = await axios.post("http://localhost:4000/api/v1/user/verify-otp", { email: formData.email, otp: formData.otp });
-        
-        // If OTP verification is successful, proceed with registration
         toast.success(response.data.message);
-        
-        // Proceed to register the user
+        setOtpVerified(true);
+        setOtpError(false);
+      } else {
         const registrationResponse = await axios.post("http://localhost:4000/api/v1/user/register", formData);
         toast.success(registrationResponse.data.message);
-        
-        // Redirect to home page after successful registration
         setTimeout(() => navigate("/"), 1500);
       }
     } catch (error) {
-      if (otpSent && error.response?.data?.message === "Invalid OTP") {
-        setOtpError(true);  // Handle incorrect OTP
+      if (otpSent && !otpVerified && error.response?.data?.message === "Invalid OTP") {
+        setOtpError(true);
       } else {
-        toast.error(error.response?.data?.message || "Registration failed!");
+        toast.error(error.response?.data?.message || "Process failed!");
       }
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      handleSubmit(e);
     }
   };
 
@@ -107,59 +86,8 @@ const Register = () => {
             Register
           </Typography>
           <Box component="form" onSubmit={handleSubmit}>
-            {/* Form fields */}
-            <TextField
-              fullWidth
-              label="Full Name"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              margin="normal"
-              required
-            />
-            <TextField
-              fullWidth
-              type="email"
-              label="Email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              margin="normal"
-              required
-            />
-            <TextField
-              fullWidth
-              type="password"
-              label="Password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              margin="normal"
-              required
-            />
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2, mt: 2 }}>
-              <FormLabel component="legend">Select Role:</FormLabel>
-              <RadioGroup row name="role" value={formData.role} onChange={handleChange}>
-                <FormControlLabel value="student" control={<Radio />} label="Student" />
-              </RadioGroup>
-            </Box>
-            {(formData.role === "collegeAdmin" || formData.role === "student") && (
-              <TextField
-                fullWidth
-                label="College ID"
-                name="registrationNumber"
-                value={formData.registrationNumber}
-                onChange={handleChange}
-                margin="normal"
-                required
-              />
-            )}
-            {formData.role === "student" && (
-              <Box sx={styles.cvUploadContainer}>
-                <Typography variant="body1">Upload CV (PDF Only)</Typography>
-                <Input type="file" accept="application/pdf" onChange={handleFileChange} required />
-              </Box>
-            )}
+            <TextField fullWidth label="Full Name" name="name" value={formData.name} onChange={handleChange} onKeyDown={handleKeyDown} margin="normal" required />
+            <TextField fullWidth type="email" label="Email" name="email" value={formData.email} onChange={handleChange} onKeyDown={handleKeyDown} margin="normal" required />
             {otpSent && (
               <TextField
                 fullWidth
@@ -167,20 +95,27 @@ const Register = () => {
                 name="otp"
                 value={formData.otp}
                 onChange={handleChange}
+                onKeyDown={handleKeyDown}
                 margin="normal"
                 required
-                error={otpError}  // Highlight error if OTP is incorrect
-                helperText={otpError && "Incorrect OTP, please try again!"}
+                error={otpError}
+                helperText={otpError ? "Incorrect OTP, please try again!" : ""}
               />
             )}
+            {otpVerified && (
+              <>
+                <TextField fullWidth label="College ID" name="registrationNumber" value={formData.registrationNumber} onChange={handleChange} onKeyDown={handleKeyDown} margin="normal" required />
+                <Box sx={{ mt: 2 }}>
+                  <Typography variant="body1">Upload CV (PDF Only)</Typography>
+                  <Input type="file" accept="application/pdf" onChange={handleFileChange} required />
+                </Box>
+              </>
+            )}
             <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2 }} disabled={cvUploading}>
-              {otpSent ? "Verify OTP" : "Register"}
+              {!otpSent ? "Send OTP" : !otpVerified ? "Verify OTP" : "Register"}
             </Button>
             <Typography sx={{ mt: 2, textAlign: "center" }}>
-              Already have an account?{" "}
-              <span onClick={() => navigate("/")} style={styles.link}>
-                Login
-              </span>
+              Already have an account? <span onClick={() => navigate("/")} style={styles.link}>Login</span>
             </Typography>
           </Box>
         </Box>
@@ -195,8 +130,7 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
     minHeight: "100vh",
-    backgroundImage:
-      "url('https://snckollam.ac.in/kezoofti/2019/10/campus-placement.jpg')",
+    backgroundImage: "url('https://snckollam.ac.in/kezoofti/2019/10/campus-placement.jpg')",
     backgroundSize: "cover",
     backgroundPosition: "center",
     backgroundAttachment: "fixed",

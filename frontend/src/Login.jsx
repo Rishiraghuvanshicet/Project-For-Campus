@@ -27,6 +27,11 @@ const Login = () => {
   // Handle form field changes
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+
+    // Trigger login on Enter key press
+    if (e.key === "Enter") {
+      handleSubmit(e);
+    }
   };
 
   // Handle role selection
@@ -82,6 +87,7 @@ const Login = () => {
               name="email"
               value={formData.email}
               onChange={handleChange}
+              onKeyDown={handleChange}
               margin="normal"
               required
               autoComplete="off"
@@ -94,6 +100,7 @@ const Login = () => {
               name="password"
               value={formData.password}
               onChange={handleChange}
+              onKeyDown={handleChange}
               margin="normal"
               required
               autoComplete="off"
@@ -115,6 +122,7 @@ const Login = () => {
                 name="collegeId"
                 value={formData.collegeId}
                 onChange={handleChange}
+                onKeyDown={handleChange}
                 margin="normal"
                 required
                 sx={styles.inputField}
