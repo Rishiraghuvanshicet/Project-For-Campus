@@ -1,11 +1,25 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { 
-  Container, Typography, Select, MenuItem, Table, TableBody, 
-  TableCell, TableContainer, TableHead, TableRow, Paper, 
-  CircularProgress, Button, IconButton, Link 
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+import {
+  Container,
+  Typography,
+  Select,
+  MenuItem,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  CircularProgress,
+  Button,
+  IconButton,
+  Link,
 } from "@mui/material";
-import { Cancel } from "@mui/icons-material"; // Import cross-circle icon
+import { Cancel } from "@mui/icons-material";
 import CollegeAdminHeader from "../components/CollegeAdminHeader";
 
 const CollegeAdminApplicants = () => {
@@ -33,8 +47,8 @@ const CollegeAdminApplicants = () => {
   const fetchApplicants = async (jobId) => {
     if (!jobId) return;
 
-    setLoading(true); 
-    setApplicants([]); // Instantly clear previous applicants
+    setLoading(true);
+    setApplicants([]);
 
     try {
       const token = localStorage.getItem("token");
@@ -50,9 +64,8 @@ const CollegeAdminApplicants = () => {
   };
 
   const handleJobChange = (event) => {
-    const jobId = event.target.value;
-    setSelectedJob(jobId);
-    fetchApplicants(jobId);
+    setSelectedJob(event.target.value);
+    fetchApplicants(event.target.value);
   };
 
   const handleDecision = async (applicationId, status) => {
@@ -63,11 +76,8 @@ const CollegeAdminApplicants = () => {
         { status },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      setApplicants((prevApplicants) =>
-        prevApplicants.map((app) =>
-          app._id === applicationId ? { ...app, status } : app
-        )
+      setApplicants((prev) =>
+        prev.map((app) => (app._id === applicationId ? { ...app, status } : app))
       );
     } catch (error) {
       console.error(`Error updating status to ${status}:`, error);
@@ -82,11 +92,32 @@ const CollegeAdminApplicants = () => {
       await axios.delete(`http://localhost:4000/api/v1/application/delete/${applicationId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
-      setApplicants((prevApplicants) => prevApplicants.filter((app) => app._id !== applicationId));
+      setApplicants((prev) => prev.filter((app) => app._id !== applicationId));
     } catch (error) {
       console.error("Error deleting application:", error);
     }
+  };
+  const handleExport = () => {
+    if (applicants.length === 0) {
+      alert("No applicants to export!");
+      return;
+    }
+    
+    const exportData = applicants.map((applicant) => ({
+      "Name": applicant.studentId.name,
+      "Email": applicant.studentId.email,
+      "CV Link": applicant.studentId.cv || "No CV uploaded",
+      "Status": applicant.status || "Pending",
+    }));
+    
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Applicants");
+    
+    const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    const data = new Blob([excelBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+    
+    saveAs(data, "Applicants.xlsx");
   };
 
   return (
@@ -103,7 +134,15 @@ const CollegeAdminApplicants = () => {
             <MenuItem key={job._id} value={job._id}>{job.title}</MenuItem>
           ))}
         </Select>
-
+        <Button
+          variant="contained"
+          color="primary"
+          sx={{ mt: 2 }}
+          onClick={handleExport}
+          disabled={applicants.length === 0}
+        >
+          Export to Excel
+        </Button>
         {loading ? (
           <CircularProgress sx={{ display: "block", margin: "20px auto" }} />
         ) : (
@@ -127,25 +166,15 @@ const CollegeAdminApplicants = () => {
                       <TableCell>{applicant.studentId.email}</TableCell>
                       <TableCell>
                         {applicant.studentId.cv ? (
-                          <Link 
-                            href={applicant.studentId.cv} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            sx={{ color: "blue", fontWeight: "bold" }}
-                          >
-                            CV
+                          <Link href={applicant.studentId.cv} target="_blank" rel="noopener noreferrer">
+                            View CV
                           </Link>
                         ) : (
                           <Typography sx={{ color: "gray" }}>No CV uploaded</Typography>
                         )}
                       </TableCell>
                       <TableCell>
-                        <Typography 
-                          sx={{ 
-                            color: applicant.status === "Accepted" ? "green" : 
-                                   applicant.status === "Rejected" ? "red" : "gray",
-                            fontWeight: "bold" 
-                          }}>
+                        <Typography sx={{ color: applicant.status === "Accepted" ? "green" : applicant.status === "Rejected" ? "red" : "gray" }}>
                           {applicant.status || "Pending"}
                         </Typography>
                       </TableCell>
@@ -153,7 +182,6 @@ const CollegeAdminApplicants = () => {
                         <Button
                           variant="contained"
                           color="success"
-                          sx={{ mr: 1 }}
                           disabled={applicant.status === "Accepted"}
                           onClick={() => handleDecision(applicant._id, "Accepted")}
                         >
@@ -169,15 +197,8 @@ const CollegeAdminApplicants = () => {
                         </Button>
                       </TableCell>
                       <TableCell align="right">
-                        <IconButton
-                          onClick={() => handleDelete(applicant._id)}
-                          sx={{
-                            color: "gray",
-                            transition: "color 0.3s",
-                            "&:hover": { color: "red" }
-                          }}
-                        >
-                          <Cancel />
+                        <IconButton onClick={() => handleDelete(applicant._id)}>
+                          <Cancel sx={{ color: "gray", transition: "color 0.3s", "&:hover": { color: "red" } }} />
                         </IconButton>
                       </TableCell>
                     </TableRow>

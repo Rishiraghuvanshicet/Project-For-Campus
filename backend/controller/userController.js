@@ -130,7 +130,7 @@ const getAllUsers = async (req, res) => {
 // Get logged-in user details
 const getUserProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id).select("name email cv"); // 🔥 Ensure cvUrl is included
+    const user = await User.findById(req.user._id).select("name email cv role"); // 🔥 Ensure cvUrl is included
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -195,6 +195,32 @@ const verifyOTP = (req, res) => {
     return res.status(400).json({ message: "Invalid OTP" });
   }
 };
+const updateUser = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { name, email, password } = req.body;
+    let updateFields = { name, email };
+
+    if (password) {
+      updateFields.password = await bcrypt.hash(password, 10);
+    }
+
+    if (req.file) {
+      updateFields.cv = req.file.path; // Store uploaded CV
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(userId, updateFields, { new: true }).select("-password");
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({ message: "Profile updated successfully", user: updatedUser });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 
 module.exports = {
   register,
@@ -205,4 +231,5 @@ module.exports = {
   getAllUsers,
   getUserProfile,
   uploadCV,
+  updateUser
 };

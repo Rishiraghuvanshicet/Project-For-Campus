@@ -9,8 +9,9 @@ const StudentEditProfile = () => {
   const [userData, setUserData] = useState({
     name: "",
     email: "",
-    cv: "",
-    password: "*****",
+    cvUrl: "",  // Store CV URL separately
+    cvFile: null, // Store the file separately
+    password: "",
   });
   const [isEditing, setIsEditing] = useState(false);
 
@@ -21,7 +22,13 @@ const StudentEditProfile = () => {
         const response = await axios.get("http://localhost:4000/api/v1/user/profile", {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setUserData(response.data);
+        setUserData({
+          name: response.data.name,
+          email: response.data.email,
+          cvUrl: response.data.cv, // Ensure it fetches the correct URL
+          cvFile: null,
+          password: "",
+        });
       } catch (error) {
         console.error("Error fetching profile data:", error);
       }
@@ -40,7 +47,7 @@ const StudentEditProfile = () => {
     if (file) {
       setUserData((prevData) => ({
         ...prevData,
-        cv: file,
+        cvFile: file, // Store the selected file
       }));
     }
   };
@@ -53,8 +60,8 @@ const StudentEditProfile = () => {
       if (userData.password) {
         formData.append("password", userData.password);
       }
-      if (userData.cv) {
-        formData.append("cv", userData.cv);
+      if (userData.cvFile) {
+        formData.append("cv", userData.cvFile); // Only send if a new file is selected
       }
 
       const token = localStorage.getItem("token");
@@ -88,7 +95,7 @@ const StudentEditProfile = () => {
           sx={{
             display: "flex",
             flexDirection: "column",
-            alignItems: "center", // Center align the box content
+            alignItems: "center",
             padding: "20px",
             border: "1px solid #ddd",
             borderRadius: "8px",
@@ -99,119 +106,52 @@ const StudentEditProfile = () => {
             {isEditing ? "Edit Profile" : "Profile Details"}
           </Typography>
 
-          {/* Name */}
-          <Box sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "flex-start", // Center align the box content
-            padding: "20px"
-          }}>
-          {isEditing ? (
-            <TextField
-              fullWidth
-              label="Name"
-              name="name"
-              value={userData.name}
-              onChange={handleInputChange}
-              sx={{
-                marginBottom: "16px",
-                textAlign: "left", // Left align the input
-              }}
-            />
-          ) : (
-            <Typography variant="body1" sx={{ marginBottom: "16px", textAlign: "left" }}>
-              <strong>Name:</strong> {userData.name}
-            </Typography>
-          )}
+          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-start", padding: "20px" }}>
+            {/* Name */}
+            {isEditing ? (
+              <TextField fullWidth label="Name" name="name" value={userData.name} onChange={handleInputChange} sx={{ marginBottom: "16px" }} />
+            ) : (
+              <Typography variant="body1" sx={{ marginBottom: "16px" }}><strong>Name:</strong> {userData.name}</Typography>
+            )}
 
-          {/* Email */}
-          {isEditing ? (
-            <TextField
-              fullWidth
-              label="Email"
-              name="email"
-              value={userData.email}
-              onChange={handleInputChange}
-              sx={{
-                marginBottom: "16px",
-                textAlign: "left",
-              }}
-            />
-          ) : (
-            <Typography variant="body1" sx={{ marginBottom: "16px", textAlign: "left" }}>
-              <strong>Email:</strong> {userData.email}
-            </Typography>
-          )}
+            {/* Email */}
+            {isEditing ? (
+              <TextField fullWidth label="Email" name="email" value={userData.email} onChange={handleInputChange} sx={{ marginBottom: "16px" }} />
+            ) : (
+              <Typography variant="body1" sx={{ marginBottom: "16px" }}><strong>Email:</strong> {userData.email}</Typography>
+            )}
 
-          {/* Password */}
-          {isEditing ? (
-            <TextField
-              fullWidth
-              label="Password"
-              name="password"
-              type="password"
-              value={userData.password}
-              onChange={handleInputChange}
-              sx={{
-                marginBottom: "16px",
-                textAlign: "left",
-              }}
-            />
-          ) : (
-            <Typography variant="body1" sx={{ marginBottom: "16px", textAlign: "left" }}>
-              <strong>Password:</strong> {`********`}
-            </Typography>
-          )}
+            {/* Password */}
+            {isEditing ? (
+              <TextField fullWidth label="Password" name="password" type="password" value={userData.password} onChange={handleInputChange} sx={{ marginBottom: "16px" }} />
+            ) : (
+              <Typography variant="body1" sx={{ marginBottom: "16px" }}><strong>Password:</strong> ********</Typography>
+            )}
 
-          {/* CV Upload */}
-          {isEditing ? (
-            <div>
-              <Button variant="outlined" component="label" sx={{ marginBottom: "16px" }}>
-                Upload CV
-                <input type="file" hidden onChange={handleFileChange} />
-              </Button>
-              {userData.cv && <Typography variant="body2">{userData.cv.name}</Typography>}
-            </div>
-          ) : (
-            <Typography variant="body1" sx={{ marginBottom: "16px", textAlign: "left" }}>
-              <strong>CV:</strong> {userData.cv ? <a href={`${userData.cv}`} target="_blank" rel="noopener noreferrer">View CV</a> : "No CV Uploaded"}
-            </Typography>
-          )}
-            </Box>
+            {/* CV Upload */}
+            {isEditing ? (
+              <>
+                <Button variant="outlined" component="label" sx={{ marginBottom: "16px", color: "orangered", borderColor: "orangered" }}>
+                  Upload CV
+                  <input type="file" hidden onChange={handleFileChange} />
+                </Button>
+                {userData.cvFile && <Typography variant="body2">{userData.cvFile.name}</Typography>}
+              </>
+            ) : (
+              <Typography variant="body1" sx={{ marginBottom: "16px" }}>
+                <strong>CV:</strong> {userData.cvUrl ? <a href={userData.cvUrl} target="_blank" rel="noopener noreferrer">View CV</a> : "No CV Uploaded"}
+              </Typography>
+            )}
+          </Box>
+
           {/* Edit/Save Button */}
           <div style={{ width: "100%", display: "flex", justifyContent: "center" }}>
             {isEditing ? (
-              <Button
-                variant="contained"
-                color="orangered"
-                onClick={handleSave}
-                sx={{
-                  marginTop: "16px",
-                  width: "200px",
-                  color:"white",
-                  backgroundColor: "orangered", // orangered color
-                  "&:hover": {
-                    backgroundColor: "#d43f3f", // darker orangered on hover
-                  },
-                }}
-              >
+              <Button variant="contained" onClick={handleSave} sx={{ marginTop: "16px", width: "200px", backgroundColor: "orangered", color: "white", "&:hover": { backgroundColor: "#d43f3f" } }}>
                 Save Changes
               </Button>
             ) : (
-              <Button
-                variant="contained"
-                color="orangered"
-                onClick={() => setIsEditing(true)}
-                sx={{
-                  marginTop: "16px",
-                  width: "200px",
-                  color:"white",
-                  backgroundColor: "orangered", // orangered color
-                  "&:hover": {
-                    backgroundColor: "#d43f3f", // darker orangered on hover
-                  },
-                }}
-              >
+              <Button variant="contained" onClick={() => setIsEditing(true)} sx={{ marginTop: "16px", width: "200px", backgroundColor: "orangered", color: "white", "&:hover": { backgroundColor: "#d43f3f" } }}>
                 Edit Profile
               </Button>
             )}

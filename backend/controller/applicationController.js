@@ -128,7 +128,26 @@ const deleteApplication = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+const getApplicationCountByJob = async (req, res) => {
+  try {
+    const applications = await Application.aggregate([
+      { $match: { collegeId: req.user.collegeId } }, // Filter by college
+      { $group: { _id: "$jobId", count: { $sum: 1 } } },
+    ]);
+
+    const countMap = {};
+    applications.forEach((app) => {
+      countMap[app._id] = app.count;
+    });
+
+    res.status(200).json(countMap);
+  } catch (error) {
+    console.error("Error fetching application count:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 
 
 
-module.exports = { applyForJob, getApplicantsByJob, getAppliedJobsByStudent, updateApplicationStatus, deleteApplication };
+
+module.exports = { applyForJob, getApplicantsByJob, getAppliedJobsByStudent, updateApplicationStatus, deleteApplication, getApplicationCountByJob };
