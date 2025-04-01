@@ -18,8 +18,13 @@ import {
   Button,
   IconButton,
   Link,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  TextField,
 } from "@mui/material";
-import { Cancel } from "@mui/icons-material";
+import { Cancel, AccessTime } from "@mui/icons-material"; // AccessTime Icon
 import CollegeAdminHeader from "../components/CollegeAdminHeader";
 
 const CollegeAdminApplicants = () => {
@@ -27,6 +32,9 @@ const CollegeAdminApplicants = () => {
   const [selectedJob, setSelectedJob] = useState("");
   const [applicants, setApplicants] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [scheduledTime, setScheduledTime] = useState("");
+  const [selectedApplicantId, setSelectedApplicantId] = useState(null);
 
   useEffect(() => {
     fetchJobs();
@@ -97,27 +105,65 @@ const CollegeAdminApplicants = () => {
       console.error("Error deleting application:", error);
     }
   };
+
   const handleExport = () => {
     if (applicants.length === 0) {
       alert("No applicants to export!");
       return;
     }
-    
+
     const exportData = applicants.map((applicant) => ({
       "Name": applicant.studentId.name,
       "Email": applicant.studentId.email,
       "CV Link": applicant.studentId.cv || "No CV uploaded",
       "Status": applicant.status || "Pending",
+      "Scheduled Time": applicant.scheduledTime || "Not Scheduled", // Add Scheduled Time in export
     }));
-    
+
     const ws = XLSX.utils.json_to_sheet(exportData);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Applicants");
-    
+
     const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
     const data = new Blob([excelBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-    
+
     saveAs(data, "Applicants.xlsx");
+  };
+
+  const handleOpenDialog = (applicantId) => {
+    setSelectedApplicantId(applicantId);
+    setOpenDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setScheduledTime("");
+  };
+
+  const handleScheduleTime = async () => {
+    if (!scheduledTime) {
+      alert("Please select a schedule time.");
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+      await axios.put(
+        `http://localhost:4000/api/v1/application/schedule-time/${selectedApplicantId}`,
+        { scheduledTime },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setApplicants((prev) =>
+        prev.map((app) =>
+          app._id === selectedApplicantId ? { ...app, scheduledTime } : app
+        )
+      );
+      setOpenDialog(false);
+      alert("Scheduled time updated successfully!");
+    } catch (error) {
+      console.error("Error scheduling time:", error);
+      alert("Failed to schedule time.");
+    }
   };
 
   return (
@@ -134,6 +180,7 @@ const CollegeAdminApplicants = () => {
             <MenuItem key={job._id} value={job._id}>{job.title}</MenuItem>
           ))}
         </Select>
+
         <Button
           variant="contained"
           color="primary"
@@ -143,6 +190,7 @@ const CollegeAdminApplicants = () => {
         >
           Export to Excel
         </Button>
+
         {loading ? (
           <CircularProgress sx={{ display: "block", margin: "20px auto" }} />
         ) : (
@@ -155,6 +203,7 @@ const CollegeAdminApplicants = () => {
                   <TableCell><strong>CV</strong></TableCell>
                   <TableCell><strong>Status</strong></TableCell>
                   <TableCell><strong>Actions</strong></TableCell>
+                  <TableCell><strong>Schedule Time</strong></TableCell> {/* Schedule Time column */}
                   <TableCell align="right"><strong>Remove</strong></TableCell>
                 </TableRow>
               </TableHead>
@@ -178,7 +227,7 @@ const CollegeAdminApplicants = () => {
                           {applicant.status || "Pending"}
                         </Typography>
                       </TableCell>
-                      <TableCell>
+                      <TableCell sx={{display:'flex',flexDirection:'column', gap:1.5}}>
                         <Button
                           variant="contained"
                           color="success"
@@ -196,6 +245,38 @@ const CollegeAdminApplicants = () => {
                           Reject
                         </Button>
                       </TableCell>
+                      <TableCell>
+                        {/* Conditional color for the icon */}
+                        {applicant.status === "Accepted" ? (
+                          applicant.scheduledTime ? (
+                            // If scheduled time is set, show green icon
+                            <IconButton
+                              onClick={() => handleOpenDialog(applicant._id)}
+                              sx={{
+                                color: "green",
+                                "&:hover": { color: "darkgreen" },
+                              }}
+                            >
+                              <AccessTime />
+                            </IconButton>
+                          ) : (
+                            // Otherwise show the orange time icon
+                            <IconButton
+                              onClick={() => handleOpenDialog(applicant._id)}
+                              sx={{
+                                color: "orangered",
+                                "&:hover": { color: "darkorange" },
+                              }}
+                            >
+                              <AccessTime />
+                            </IconButton>
+                          )
+                        ) : (
+                          applicant.status === "Rejected" && (
+                            <Typography sx={{ color: "gray" }}>Schedule Time</Typography>
+                          )
+                        )}
+                      </TableCell>
                       <TableCell align="right">
                         <IconButton onClick={() => handleDelete(applicant._id)}>
                           <Cancel sx={{ color: "gray", transition: "color 0.3s", "&:hover": { color: "red" } }} />
@@ -205,7 +286,7 @@ const CollegeAdminApplicants = () => {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={6} align="center">No applicants found.</TableCell>
+                    <TableCell colSpan={7} align="center">No applicants found.</TableCell>
                   </TableRow>
                 )}
               </TableBody>
@@ -213,8 +294,34 @@ const CollegeAdminApplicants = () => {
           </TableContainer>
         )}
       </Container>
+
+      {/* Dialog for scheduling interview */}
+      <Dialog open={openDialog} onClose={handleCloseDialog}>
+        <DialogTitle>Schedule Interview</DialogTitle>
+        <DialogContent>
+          <TextField
+            label="Scheduled Time"
+            type="datetime-local"
+            value={scheduledTime}
+            onChange={(e) => setScheduledTime(e.target.value)}
+            fullWidth
+            InputLabelProps={{
+              shrink: true,
+            }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleScheduleTime} color="primary">
+            Schedule
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 };
 
 export default CollegeAdminApplicants;
+

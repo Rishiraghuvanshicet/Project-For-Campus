@@ -14,8 +14,8 @@ import {
   Alert,
   Button,
 } from "@mui/material";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack"; 
-import { useNavigate } from "react-router-dom"; 
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { useNavigate } from "react-router-dom";
 import StudentHeader from "../components/StudentHeader";
 
 const StudentAppliedJobs = () => {
@@ -59,7 +59,7 @@ const StudentAppliedJobs = () => {
       <StudentHeader />
       <Container sx={{ marginTop: "100px", textAlign: "center" }}>
         <Button
-          startIcon={<ArrowBackIcon />} 
+          startIcon={<ArrowBackIcon />}
           onClick={() => navigate("/student-dashboard")}
           sx={{
             position: "absolute",
@@ -101,6 +101,7 @@ const StudentAppliedJobs = () => {
                   <TableCell><b>Company</b></TableCell>
                   <TableCell><b>Status</b></TableCell>
                   <TableCell><b>Applied Date</b></TableCell>
+                  <TableCell><b>Scheduled Time</b></TableCell> {/* New Column for Scheduled Time */}
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -110,6 +111,16 @@ const StudentAppliedJobs = () => {
                     <TableCell>{job.jobId?.companyName || "N/A"}</TableCell>
                     <TableCell>{job.status}</TableCell>
                     <TableCell>{new Date(job.createdAt).toLocaleDateString()}</TableCell>
+
+                    {/* Conditionally Render Scheduled Time */}
+                    <TableCell>
+                      {job.status === "Accepted"
+                        ? job.scheduledTime
+                          ? new Date(job.scheduledTime).toLocaleString()  
+                          : "No scheduled time"  
+                        : "Schedule Pending"  
+                      }
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>

@@ -4,6 +4,7 @@ import axios from "axios";
 import { Container, Typography, Box, RadioGroup, FormControlLabel, Radio, FormControl } from "@mui/material";
 import CardList from "../components/CardList";
 import StudentHeader from "../components/StudentHeader";
+import Chatbot from "./Chatbot";
 
 const StudentDashboard = () => {
   const [jobs, setJobs] = useState([]);
@@ -36,7 +37,7 @@ const StudentDashboard = () => {
       const response = await axios.get("http://localhost:4000/api/v1/application/getAppliedJobs", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setAppliedJobs(response.data.map((app) => app.jobId._id)); // Store applied job IDs
+      setAppliedJobs(response.data.map((app) => app.jobId._id)); 
     } catch (error) {
       console.error("Error fetching applied jobs:", error);
     }
@@ -48,7 +49,7 @@ const StudentDashboard = () => {
       const response = await axios.get("http://localhost:4000/api/v1/user/profile", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setCvUrl(response.data.cv || ""); // Store CV URL
+      setCvUrl(response.data.cv || ""); 
     } catch (error) {
       console.error("Error fetching student profile:", error);
     }
@@ -107,6 +108,7 @@ const StudentDashboard = () => {
           <Typography variant="h5" gutterBottom sx={{ fontWeight: "bold", mb: 2 }}>Available Jobs</Typography>
           <CardList jobs={filteredJobs} appliedJobs={appliedJobs} applyForJob={applyForJob} />
         </Box>
+        <Chatbot/>
       </Container>
     </>
   );

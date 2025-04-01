@@ -7,11 +7,10 @@ const StudentHeader = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Dropdown menu state
   const [anchorEl, setAnchorEl] = useState(null);
   const openMenu = Boolean(anchorEl);
 
-  // Handle Menu Open and Close
+
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -32,11 +31,11 @@ const StudentHeader = () => {
     handleMenuClose(); // Close the menu after redirect
   };
 
-  // Determine active page based on the current route
+
   const getActivePage = () => {
     if (location.pathname === "/student-dashboard") return "home";
     if (location.pathname === "/student-dashboard/applied-jobs") return "applied-jobs";
-    if (location.pathname === "/student-dashboard") return "status";
+    if (location.pathname === "/student-dashboard/JobView") return "status";
     return "";
   };
 
@@ -79,7 +78,7 @@ const StudentHeader = () => {
           <Button
             sx={{ color: activePage === "status" ? "orangered" : "black" }}
             component={Link}
-            to="/student-dashboard"
+            to="/student-dashboard/JobView"
             onClick={() => setActivePage("status")}
           >
             Status

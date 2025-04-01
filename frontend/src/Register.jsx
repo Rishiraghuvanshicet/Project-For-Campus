@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { Container, TextField, Button, Typography, Box, Input } from "@mui/material";
+import {
+  Container,
+  TextField,
+  Button,
+  Typography,
+  Box,
+  Input,
+} from "@mui/material";
 import { toast, ToastContainer } from "react-toastify";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -34,8 +41,14 @@ const Register = () => {
     cvFormData.append("upload_preset", "CHANDAN-SRMS");
 
     try {
-      const response = await axios.post("https://api.cloudinary.com/v1_1/dx4ctlu0h/upload", cvFormData);
-      setFormData((prevFormData) => ({ ...prevFormData, cv: response.data.secure_url }));
+      const response = await axios.post(
+        "https://api.cloudinary.com/v1_1/dx4ctlu0h/upload",
+        cvFormData
+      );
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        cv: response.data.secure_url,
+      }));
       toast.success("CV uploaded successfully!");
     } catch (error) {
       toast.error("CV upload failed!");
@@ -49,21 +62,34 @@ const Register = () => {
 
     try {
       if (!otpSent) {
-        const response = await axios.post("http://localhost:4000/api/v1/user/request-otp", { email: formData.email });
+        const response = await axios.post(
+          "http://localhost:4000/api/v1/user/request-otp",
+          { email: formData.email }
+        );
         toast.success(response.data.message);
         setOtpSent(true);
       } else if (!otpVerified) {
-        const response = await axios.post("http://localhost:4000/api/v1/user/verify-otp", { email: formData.email, otp: formData.otp });
+        const response = await axios.post(
+          "http://localhost:4000/api/v1/user/verify-otp",
+          { email: formData.email, otp: formData.otp }
+        );
         toast.success(response.data.message);
         setOtpVerified(true);
         setOtpError(false);
       } else {
-        const registrationResponse = await axios.post("http://localhost:4000/api/v1/user/register", formData);
+        const registrationResponse = await axios.post(
+          "http://localhost:4000/api/v1/user/register",
+          formData
+        );
         toast.success(registrationResponse.data.message);
         setTimeout(() => navigate("/"), 1500);
       }
     } catch (error) {
-      if (otpSent && !otpVerified && error.response?.data?.message === "Invalid OTP") {
+      if (
+        otpSent &&
+        !otpVerified &&
+        error.response?.data?.message === "Invalid OTP"
+      ) {
         setOtpError(true);
       } else {
         toast.error(error.response?.data?.message || "Process failed!");
@@ -82,12 +108,36 @@ const Register = () => {
       <Container maxWidth="sm">
         <ToastContainer position="top-right" autoClose={3000} />
         <Box sx={styles.formContainer}>
-          <Typography variant="h4" sx={{ mb: 2, fontWeight: "bold", color: "#333" }}>
+          <Typography
+            variant="h4"
+            sx={{ mb: 2, fontWeight: "bold", color: "#333" }}
+          >
             Register
           </Typography>
           <Box component="form" onSubmit={handleSubmit}>
-            <TextField fullWidth label="Full Name" name="name" value={formData.name} onChange={handleChange} onKeyDown={handleKeyDown} margin="normal" required />
-            <TextField fullWidth type="email" label="Email" name="email" value={formData.email} onChange={handleChange} onKeyDown={handleKeyDown} margin="normal" required />
+            <TextField
+              fullWidth
+              label="Full Name"
+              name="name"
+              autoComplete="off"
+              value={formData.name}
+              onChange={handleChange}
+              onKeyDown={handleKeyDown}
+              margin="normal"
+              required
+            />
+            <TextField
+              fullWidth
+              type="email"
+              label="Email"
+              autoComplete="off"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              onKeyDown={handleKeyDown}
+              margin="normal"
+              required
+            />
             {otpSent && (
               <TextField
                 fullWidth
@@ -98,24 +148,49 @@ const Register = () => {
                 onKeyDown={handleKeyDown}
                 margin="normal"
                 required
+                autoComplete="off"
                 error={otpError}
                 helperText={otpError ? "Incorrect OTP, please try again!" : ""}
               />
             )}
             {otpVerified && (
               <>
-                <TextField fullWidth label="College ID" name="registrationNumber" value={formData.registrationNumber} onChange={handleChange} onKeyDown={handleKeyDown} margin="normal" required />
+                <TextField
+                  fullWidth
+                  label="College ID"
+                  name="registrationNumber"
+                  value={formData.registrationNumber}
+                  onChange={handleChange}
+                  onKeyDown={handleKeyDown}
+                  margin="normal"
+                  required
+                />
                 <Box sx={{ mt: 2 }}>
                   <Typography variant="body1">Upload CV (PDF Only)</Typography>
-                  <Input type="file" accept="application/pdf" onChange={handleFileChange} required />
+                  <Input
+                    type="file"
+                    accept="application/pdf"
+                    onChange={handleFileChange}
+                    required
+                  />
                 </Box>
               </>
             )}
-            <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2 }} disabled={cvUploading}>
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              fullWidth
+              sx={{ mt: 2 }}
+              disabled={cvUploading}
+            >
               {!otpSent ? "Send OTP" : !otpVerified ? "Verify OTP" : "Register"}
             </Button>
             <Typography sx={{ mt: 2, textAlign: "center" }}>
-              Already have an account? <span onClick={() => navigate("/")} style={styles.link}>Login</span>
+              Already have an account?{" "}
+              <span onClick={() => navigate("/")} style={styles.link}>
+                Login
+              </span>
             </Typography>
           </Box>
         </Box>
@@ -130,7 +205,8 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
     minHeight: "100vh",
-    backgroundImage: "url('https://snckollam.ac.in/kezoofti/2019/10/campus-placement.jpg')",
+    backgroundImage:
+      "url('https://snckollam.ac.in/kezoofti/2019/10/campus-placement.jpg')",
     backgroundSize: "cover",
     backgroundPosition: "center",
     backgroundAttachment: "fixed",

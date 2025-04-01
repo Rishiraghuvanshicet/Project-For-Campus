@@ -44,6 +44,7 @@ const getJobsByCollege = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
 //get One Job Detail For Student 
 const getSingleJobDetails = async (req, res) => {
   try {
@@ -117,6 +118,7 @@ const updateJob = async (req, res) => {
   }
 };
 
+// get The total number of job posted by college
 const getTotalJobsByCollege = async (req, res) => {
   try {
     if (!req.user || req.user.role !== "collegeAdmin") {
@@ -131,6 +133,8 @@ const getTotalJobsByCollege = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+//get the Job posted time (for student view)
 const getJobPostingTimeline = async (req, res) => {
   try {
     const collegeId = req.user.collegeId; // Extract collegeId from authenticated user

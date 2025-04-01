@@ -47,20 +47,20 @@ const JobCard = ({ job, appliedJobs, applyForJob }) => {
           disabled={isApplied}
           onClick={handleApply}
           sx={{
-            borderRadius: "50%", // Circular button
+            borderRadius: "50%", 
             width: "70px",
             height: "70px",
             fontWeight: "bold",
             fontSize: "14px",
             color: "white",
-            background: isApplied ? "green" : "orangered", // Default Orange
+            background: isApplied ? "green" : "orangered", 
             transition: "background 0.4s ease-in-out, box-shadow 0.6s ease-in-out",
             boxShadow: isApplied
-              ? "0px 0px 10px rgba(0, 255, 0, 0.8)" // Green glow when applied
+              ? "0px 0px 10px rgba(0, 255, 0, 0.8)" 
               : "none",
             "&:hover": {
-              background: isApplied ? "green" : "limegreen", // Hover turns Green
-              boxShadow: "0px 0px 12px rgba(50, 205, 50, 0.6)", // Soft green glow
+              background: isApplied ? "green" : "limegreen",
+              boxShadow: "0px 0px 12px rgba(50, 205, 50, 0.6)", 
             },
           }}
         >

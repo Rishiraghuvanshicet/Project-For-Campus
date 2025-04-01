@@ -1,5 +1,5 @@
 const express = require("express");
-const { applyForJob, getApplicantsByJob, getAppliedJobsByStudent, updateApplicationStatus, deleteApplication, getApplicationCountByJob } = require("../controller/applicationController");
+const { applyForJob, getApplicantsByJob, getAppliedJobsByStudent, updateApplicationStatus, deleteApplication, getApplicationCountByJob, updateScheduledTime } = require("../controller/applicationController");
 const authMiddleware = require("../middleware/authMiddleware");
 
 const router = express.Router();
@@ -10,5 +10,6 @@ router.get("/getAppliedJobs", authMiddleware, getAppliedJobsByStudent); // Fetch
 router.put("/update-status/:id", authMiddleware, updateApplicationStatus); // update the status
 router.delete("/delete/:id", authMiddleware, deleteApplication);
 router.get("/countByJob", authMiddleware, getApplicationCountByJob); // New route
+router.put("/schedule-time/:id", authMiddleware, updateScheduledTime);// Time Schedule Route
 
 module.exports = router;

@@ -43,7 +43,6 @@ const applyForJob = async (req, res) => {
   }
 };
 
-
 // Get Applicants for a Job (College Admin View)
 const getApplicantsByJob = async (req, res) => {
   try {
@@ -79,7 +78,6 @@ const getAppliedJobsByStudent = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
-
 
 // PUT /api/v1/application/update-status/:id
 const updateApplicationStatus = async (req, res) => {
@@ -128,6 +126,8 @@ const deleteApplication = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+//Get count of application
 const getApplicationCountByJob = async (req, res) => {
   try {
     const applications = await Application.aggregate([
@@ -147,7 +147,35 @@ const getApplicationCountByJob = async (req, res) => {
   }
 };
 
+//update the Time Schedule
+const updateScheduledTime = async (req, res) => {
+  try {
+    const { id } = req.params;  // Use a single parameter (id) for the application ID
+    const { scheduledTime } = req.body;
+
+    // Validate the scheduled time
+    if (!scheduledTime) {
+      return res.status(400).json({ message: "Scheduled time is required" });
+    }
+
+    // Update the application with the scheduled time
+    const application = await Application.findByIdAndUpdate(
+      id,  // Find the application by its ID
+      { scheduledTime },  // Update the scheduled time
+      { new: true }  // Return the updated document
+    );
+
+    if (!application) {
+      return res.status(404).json({ message: "Application not found" });
+    }
+
+    res.status(200).json({ message: "Scheduled time updated successfully", application });
+  } catch (error) {
+    console.error("Error updating scheduled time:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 
 
 
-module.exports = { applyForJob, getApplicantsByJob, getAppliedJobsByStudent, updateApplicationStatus, deleteApplication, getApplicationCountByJob };
+module.exports = { applyForJob, getApplicantsByJob, getAppliedJobsByStudent, updateApplicationStatus, deleteApplication, getApplicationCountByJob, updateScheduledTime };

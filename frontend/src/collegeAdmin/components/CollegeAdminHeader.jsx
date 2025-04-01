@@ -8,7 +8,6 @@ const CollegeAdminHeader = () => {
   const location = useLocation();
   const [anchorEl, setAnchorEl] = useState(null);
 
-  // Determine active page based on the current route
   const getActivePage = () => {
     if (location.pathname === "/college-admin-home-page") return "home";
     if (location.pathname === "/college-admin-dashboard") return "dashboard";
@@ -68,7 +67,7 @@ const CollegeAdminHeader = () => {
           </Button>
         </Box>
 
-        {/* Dropdown Menu for Edit Profile and Logout */}
+
         <Box>
         <IconButton
           onClick={handleMenuClick}

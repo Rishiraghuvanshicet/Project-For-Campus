@@ -86,7 +86,6 @@ const updateCollegeDetails = async (req, res) => {
   }
 };
 
-
 // Delete College
 const deleteCollege = async (req, res) => {
   try {
@@ -124,6 +123,8 @@ const getCollegeDetails = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
+//get Strength of student
 const getTotalStudentsByCollege = async (req, res) => {
   try {
     if (!req.user || req.user.role !== "collegeAdmin") {

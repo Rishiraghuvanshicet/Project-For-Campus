@@ -15,7 +15,7 @@ const authMiddleware = async (req, res, next) => {
     if (!req.user) {
       return res.status(401).json({ message: "Unauthorized" });
     }
-    // Ensure collegeId is an ObjectId
+
     if (req.user.collegeId) {
       req.user.collegeId = new mongoose.Types.ObjectId(req.user.collegeId);
     }

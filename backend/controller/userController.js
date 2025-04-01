@@ -57,7 +57,6 @@ const register = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-
 const login = async (req, res) => {
   try {
     const { email, password, role, collegeId } = req.body;
@@ -116,7 +115,6 @@ const logout = async (req, res) => {
     console.log(error);
   }
 };
-
 // Get all users (Admin Only)
 const getAllUsers = async (req, res) => {
   try {
@@ -126,7 +124,6 @@ const getAllUsers = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-
 // Get logged-in user details
 const getUserProfile = async (req, res) => {
   try {
@@ -139,7 +136,6 @@ const getUserProfile = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
-
 const uploadCV = async (req, res) => {
   try {
     if (!req.file) {
@@ -175,7 +171,6 @@ const requestOTP = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
 // Handle OTP verification
 const verifyOTP = (req, res) => {
   const { otp } = req.body;

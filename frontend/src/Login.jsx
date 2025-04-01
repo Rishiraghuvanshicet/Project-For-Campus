@@ -47,13 +47,19 @@ const Login = () => {
       toast.error("Please fill in all required fields.");
       return;
     }
-    if ((formData.role === "collegeAdmin" || formData.role === "student") && !formData.collegeId) {
+    if (
+      (formData.role === "collegeAdmin" || formData.role === "student") &&
+      !formData.collegeId
+    ) {
       toast.error("College ID is required.");
       return;
     }
 
     try {
-      const response = await axios.post("http://localhost:4000/api/v1/user/login", formData);
+      const response = await axios.post(
+        "http://localhost:4000/api/v1/user/login",
+        formData
+      );
       const { token, user } = response.data;
 
       toast.success("Login successful!");
@@ -64,7 +70,11 @@ const Login = () => {
       localStorage.setItem("collegeId", user.collegeId || "");
 
       setTimeout(() => {
-        navigate(user.role === "collegeAdmin" ? "/college-admin-home-page" : "/student-dashboard");
+        navigate(
+          user.role === "collegeAdmin"
+            ? "/college-admin-home-page"
+            : "/student-dashboard"
+        );
       }, 2000);
     } catch (error) {
       toast.error(error.response?.data?.message || "Login failed!");
@@ -76,7 +86,10 @@ const Login = () => {
       <Container maxWidth="sm">
         <ToastContainer position="top-right" autoClose={3000} />
         <Box sx={styles.formContainer}>
-          <Typography variant="h4" sx={{ mb: 2, fontWeight: "bold", color: "#333" }}>
+          <Typography
+            variant="h4"
+            sx={{ mb: 2, fontWeight: "bold", color: "#333" }}
+          >
             Login
           </Typography>
           <Box component="form" onSubmit={handleSubmit}>
@@ -109,13 +122,27 @@ const Login = () => {
 
             <Box sx={{ display: "flex", alignItems: "center", gap: 2, mt: 2 }}>
               <FormLabel component="legend">Select Role:</FormLabel>
-              <RadioGroup row name="role" value={formData.role} onChange={handleRoleChange}>
-                <FormControlLabel value="collegeAdmin" control={<Radio />} label="College Admin" />
-                <FormControlLabel value="student" control={<Radio />} label="Student" />
+              <RadioGroup
+                row
+                name="role"
+                value={formData.role}
+                onChange={handleRoleChange}
+              >
+                <FormControlLabel
+                  value="collegeAdmin"
+                  control={<Radio />}
+                  label="College Admin"
+                />
+                <FormControlLabel
+                  value="student"
+                  control={<Radio />}
+                  label="Student"
+                />
               </RadioGroup>
             </Box>
 
-            {(formData.role === "collegeAdmin" || formData.role === "student") && (
+            {(formData.role === "collegeAdmin" ||
+              formData.role === "student") && (
               <TextField
                 fullWidth
                 label="College ID"
@@ -125,11 +152,18 @@ const Login = () => {
                 onKeyDown={handleChange}
                 margin="normal"
                 required
+                autoComplete="off"
                 sx={styles.inputField}
               />
             )}
 
-            <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2 }}>
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              fullWidth
+              sx={{ mt: 2 }}
+            >
               Login
             </Button>
 
@@ -152,7 +186,8 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
     minHeight: "100vh",
-    backgroundImage: "url('https://snckollam.ac.in/kezoofti/2019/10/campus-placement.jpg')",
+    backgroundImage:
+      "url('https://snckollam.ac.in/kezoofti/2019/10/campus-placement.jpg')",
     backgroundSize: "cover",
     backgroundPosition: "center",
     backgroundAttachment: "fixed",
