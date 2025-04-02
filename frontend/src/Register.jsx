@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Container,
   TextField,
@@ -6,10 +6,12 @@ import {
   Typography,
   Box,
   Input,
+  IconButton,
 } from "@mui/material";
 import { toast, ToastContainer } from "react-toastify";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import RefreshIcon from "@mui/icons-material/Refresh";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -17,6 +19,7 @@ const Register = () => {
   const [otpSent, setOtpSent] = useState(false);
   const [otpVerified, setOtpVerified] = useState(false);
   const [otpError, setOtpError] = useState(false);
+  const [timer, setTimer] = useState(600);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -24,6 +27,22 @@ const Register = () => {
     registrationNumber: "",
     cv: "",
   });
+
+  useEffect(() => {
+    let interval;
+    if (otpSent && timer > 0) {
+      interval = setInterval(() => {
+        setTimer((prevTime) => prevTime - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [otpSent, timer]);
+
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${minutes}:${secs < 10 ? "0" : ""}${secs}`;
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -57,49 +76,50 @@ const Register = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
+  const handleSendOtp = async () => {
     try {
-      if (!otpSent) {
-        const response = await axios.post(
-          "http://localhost:4000/api/v1/user/request-otp",
-          { email: formData.email }
-        );
-        toast.success(response.data.message);
-        setOtpSent(true);
-      } else if (!otpVerified) {
-        const response = await axios.post(
-          "http://localhost:4000/api/v1/user/verify-otp",
-          { email: formData.email, otp: formData.otp }
-        );
-        toast.success(response.data.message);
-        setOtpVerified(true);
-        setOtpError(false);
-      } else {
-        const registrationResponse = await axios.post(
-          "http://localhost:4000/api/v1/user/register",
-          formData
-        );
-        toast.success(registrationResponse.data.message);
-        setTimeout(() => navigate("/"), 1500);
-      }
+      const response = await axios.post(
+        "http://localhost:4000/api/v1/user/request-otp",
+        { email: formData.email }
+      );
+      toast.success(response.data.message);
+      setOtpSent(true);
+      setTimer(600);
     } catch (error) {
-      if (
-        otpSent &&
-        !otpVerified &&
-        error.response?.data?.message === "Invalid OTP"
-      ) {
-        setOtpError(true);
-      } else {
-        toast.error(error.response?.data?.message || "Process failed!");
-      }
+      toast.error(error.response?.data?.message || "OTP request failed!");
     }
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter") {
-      handleSubmit(e);
+  const handleVerifyOtp = async () => {
+    if (timer <= 0) {
+      toast.error("OTP expired! Please request a new one.");
+      return;
+    }
+    try {
+      const response = await axios.post(
+        "http://localhost:4000/api/v1/user/verify-otp",
+        { email: formData.email, otp: formData.otp }
+      );
+      toast.success(response.data.message);
+      setOtpVerified(true);
+      setOtpError(false);
+    } catch (error) {
+      setOtpError(true);
+      toast.error("Incorrect OTP! Please try again.");
+    }
+  };
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post(
+        "http://localhost:4000/api/v1/user/register",
+        formData
+      );
+      toast.success(response.data.message);
+      setTimeout(() => navigate("/"), 1500);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Registration failed!");
     }
   };
 
@@ -108,13 +128,10 @@ const Register = () => {
       <Container maxWidth="sm">
         <ToastContainer position="top-right" autoClose={3000} />
         <Box sx={styles.formContainer}>
-          <Typography
-            variant="h4"
-            sx={{ mb: 2, fontWeight: "bold", color: "#333" }}
-          >
+          <Typography variant="h4" sx={{ mb: 2, fontWeight: "bold" }}>
             Register
           </Typography>
-          <Box component="form" onSubmit={handleSubmit}>
+          <Box component="form" onSubmit={handleRegister}>
             <TextField
               fullWidth
               label="Full Name"
@@ -122,7 +139,6 @@ const Register = () => {
               autoComplete="off"
               value={formData.name}
               onChange={handleChange}
-              onKeyDown={handleKeyDown}
               margin="normal"
               required
             />
@@ -134,24 +150,33 @@ const Register = () => {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              onKeyDown={handleKeyDown}
               margin="normal"
               required
             />
             {otpSent && (
-              <TextField
-                fullWidth
-                label="Enter OTP"
-                name="otp"
-                value={formData.otp}
-                onChange={handleChange}
-                onKeyDown={handleKeyDown}
-                margin="normal"
-                required
-                autoComplete="off"
-                error={otpError}
-                helperText={otpError ? "Incorrect OTP, please try again!" : ""}
-              />
+              <Box display="flex" alignItems="center" gap={1}>
+                <TextField
+                  fullWidth
+                  label="Enter OTP"
+                  name="otp"
+                  value={formData.otp}
+                  onChange={handleChange}
+                  margin="normal"
+                  required
+                  autoComplete="off"
+                  error={otpError}
+                  helperText={otpError ? "Incorrect OTP, try again!" : ""}
+                />
+                <Typography variant="body2">{formatTime(timer)}</Typography>
+                <IconButton
+                  onClick={() => {
+                    setTimer(600); // Reset the timer
+                    handleSendOtp(); // Resend OTP
+                  }}
+                >
+                  <RefreshIcon />
+                </IconButton>
+              </Box>
             )}
             {otpVerified && (
               <>
@@ -161,7 +186,6 @@ const Register = () => {
                   name="registrationNumber"
                   value={formData.registrationNumber}
                   onChange={handleChange}
-                  onKeyDown={handleKeyDown}
                   margin="normal"
                   required
                 />
@@ -177,21 +201,20 @@ const Register = () => {
               </>
             )}
             <Button
-              type="submit"
               variant="contained"
               color="primary"
               fullWidth
               sx={{ mt: 2 }}
-              disabled={cvUploading}
+              onClick={
+                !otpSent
+                  ? handleSendOtp
+                  : !otpVerified
+                  ? handleVerifyOtp
+                  : handleRegister
+              }
             >
               {!otpSent ? "Send OTP" : !otpVerified ? "Verify OTP" : "Register"}
             </Button>
-            <Typography sx={{ mt: 2, textAlign: "center" }}>
-              Already have an account?{" "}
-              <span onClick={() => navigate("/")} style={styles.link}>
-                Login
-              </span>
-            </Typography>
           </Box>
         </Box>
       </Container>

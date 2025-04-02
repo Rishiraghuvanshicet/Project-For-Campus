@@ -2,10 +2,15 @@ const nodemailer = require("nodemailer");
 const crypto = require("crypto");  // For generating random OTPs
 
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",  
+  port: 587,  
+  secure: false, 
   auth: {
     user: process.env.EMAIL_USER, // Your Gmail
     pass: process.env.EMAIL_PASS, // App password (not your Gmail password)
+  },
+  tls: {
+    rejectUnauthorized: false,  
   },
 });
 
@@ -17,8 +22,9 @@ const sendOTP = async (email) => {
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
-      subject: "Your OTP for Email Verification",
-      text: `Your OTP is: ${otp}`,
+      subject: "OTP for Email Verification",
+      text: `Hello, Student !!
+              To verify Your Account before Register in the Campur Recruitment System You Need To Verify The OTP And Your OTP is: ${otp}`,
     };
 
     await transporter.sendMail(mailOptions);
