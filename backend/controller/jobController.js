@@ -7,8 +7,16 @@ const createJob = async (req, res) => {
       return res.status(403).json({ message: "Access denied" });
     }
 
-    const { title, description, location, requirements, salary, companyName } = req.body;
-    if (!title || !description || !requirements || !location  || !salary || !companyName) {
+    const { title, description, location, requirements, salary, companyName } =
+      req.body;
+    if (
+      !title ||
+      !description ||
+      !requirements ||
+      !location ||
+      !salary ||
+      !companyName
+    ) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -33,7 +41,9 @@ const createJob = async (req, res) => {
 const getJobsByCollege = async (req, res) => {
   try {
     if (!req.user || !req.user.collegeId) {
-      return res.status(401).json({ message: "Unauthorized: Missing college ID" });
+      return res
+        .status(401)
+        .json({ message: "Unauthorized: Missing college ID" });
     }
 
     const jobs = await Job.find({ collegeId: req.user.collegeId });
@@ -45,13 +55,12 @@ const getJobsByCollege = async (req, res) => {
   }
 };
 
-//get One Job Detail For Student 
+//get One Job Detail For Student
 const getSingleJobDetails = async (req, res) => {
   try {
-    const { jobId } = req.params;
+    const { id } = req.params;
 
-    // Find the job by ID
-    const job = await Job.findById(jobId);
+    const job = await Job.findById(id);
     if (!job) {
       return res.status(404).json({ message: "Job not found" });
     }
@@ -76,7 +85,9 @@ const deleteJob = async (req, res) => {
 
     // Ensure only the college admin who posted it can delete
     if (job.postedBy.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ message: "Unauthorized to delete this job" });
+      return res
+        .status(403)
+        .json({ message: "Unauthorized to delete this job" });
     }
 
     await Job.findByIdAndDelete(jobId);
@@ -101,7 +112,9 @@ const updateJob = async (req, res) => {
 
     // Ensure only the college admin who posted it can update
     if (job.postedBy.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ message: "Unauthorized to update this job" });
+      return res
+        .status(403)
+        .json({ message: "Unauthorized to update this job" });
     }
 
     // Update the job
@@ -125,7 +138,9 @@ const getTotalJobsByCollege = async (req, res) => {
       return res.status(403).json({ message: "Access denied" });
     }
 
-    const jobCount = await Job.countDocuments({ collegeId: req.user.collegeId });
+    const jobCount = await Job.countDocuments({
+      collegeId: req.user.collegeId,
+    });
 
     res.status(200).json({ totalJobs: jobCount });
   } catch (error) {
@@ -162,4 +177,12 @@ const getJobPostingTimeline = async (req, res) => {
   }
 };
 
-module.exports = { createJob, getJobsByCollege, getSingleJobDetails, deleteJob, updateJob, getTotalJobsByCollege,getJobPostingTimeline };
+module.exports = {
+  createJob,
+  getJobsByCollege,
+  getSingleJobDetails,
+  deleteJob,
+  updateJob,
+  getTotalJobsByCollege,
+  getJobPostingTimeline,
+};

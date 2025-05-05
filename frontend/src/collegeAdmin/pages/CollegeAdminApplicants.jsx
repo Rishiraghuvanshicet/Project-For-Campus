@@ -36,6 +36,8 @@ const CollegeAdminApplicants = () => {
   const [scheduledTime, setScheduledTime] = useState("");
   const [selectedApplicantId, setSelectedApplicantId] = useState(null);
 
+  const now = new Date().toISOString().slice(0, 16);
+
   useEffect(() => {
     fetchJobs();
   }, []);
@@ -43,9 +45,12 @@ const CollegeAdminApplicants = () => {
   const fetchJobs = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get("http://localhost:4000/api/v1/job/college", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axios.get(
+        "http://localhost:4000/api/v1/job/college",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       setJobs(response.data || []);
     } catch (error) {
       console.error("Error fetching jobs:", error);
@@ -60,9 +65,12 @@ const CollegeAdminApplicants = () => {
 
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get(`http://localhost:4000/api/v1/application/applicants/${jobId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axios.get(
+        `http://localhost:4000/api/v1/application/applicants/${jobId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       setApplicants(response.data || []);
     } catch (error) {
       console.error("Error fetching applicants:", error);
@@ -85,7 +93,9 @@ const CollegeAdminApplicants = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setApplicants((prev) =>
-        prev.map((app) => (app._id === applicationId ? { ...app, status } : app))
+        prev.map((app) =>
+          app._id === applicationId ? { ...app, status } : app
+        )
       );
     } catch (error) {
       console.error(`Error updating status to ${status}:`, error);
@@ -93,13 +103,17 @@ const CollegeAdminApplicants = () => {
   };
 
   const handleDelete = async (applicationId) => {
-    if (!window.confirm("Are you sure you want to delete this application?")) return;
+    if (!window.confirm("Are you sure you want to delete this application?"))
+      return;
 
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(`http://localhost:4000/api/v1/application/delete/${applicationId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axios.delete(
+        `http://localhost:4000/api/v1/application/delete/${applicationId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       setApplicants((prev) => prev.filter((app) => app._id !== applicationId));
     } catch (error) {
       console.error("Error deleting application:", error);
@@ -113,10 +127,10 @@ const CollegeAdminApplicants = () => {
     }
 
     const exportData = applicants.map((applicant) => ({
-      "Name": applicant.studentId.name,
-      "Email": applicant.studentId.email,
+      Name: applicant.studentId.name,
+      Email: applicant.studentId.email,
       "CV Link": applicant.studentId.cv || "No CV uploaded",
-      "Status": applicant.status || "Pending",
+      Status: applicant.status || "Pending",
       "Scheduled Time": applicant.scheduledTime || "Not Scheduled", // Add Scheduled Time in export
     }));
 
@@ -125,7 +139,9 @@ const CollegeAdminApplicants = () => {
     XLSX.utils.book_append_sheet(wb, ws, "Applicants");
 
     const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    const data = new Blob([excelBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+    const data = new Blob([excelBuffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
 
     saveAs(data, "Applicants.xlsx");
   };
@@ -174,10 +190,19 @@ const CollegeAdminApplicants = () => {
           View Job Applicants
         </Typography>
 
-        <Select value={selectedJob} onChange={handleJobChange} fullWidth displayEmpty>
-          <MenuItem value="" disabled>Select a Job</MenuItem>
+        <Select
+          value={selectedJob}
+          onChange={handleJobChange}
+          fullWidth
+          displayEmpty
+        >
+          <MenuItem value="" disabled>
+            Select a Job
+          </MenuItem>
           {jobs.map((job) => (
-            <MenuItem key={job._id} value={job._id}>{job.title}</MenuItem>
+            <MenuItem key={job._id} value={job._id}>
+              {job.title}
+            </MenuItem>
           ))}
         </Select>
 
@@ -188,7 +213,7 @@ const CollegeAdminApplicants = () => {
           onClick={handleExport}
           disabled={applicants.length === 0}
         >
-          Export to Excel
+          Extract to Excel
         </Button>
 
         {loading ? (
@@ -198,13 +223,28 @@ const CollegeAdminApplicants = () => {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell><strong>Name</strong></TableCell>
-                  <TableCell><strong>Email</strong></TableCell>
-                  <TableCell><strong>CV</strong></TableCell>
-                  <TableCell><strong>Status</strong></TableCell>
-                  <TableCell><strong>Actions</strong></TableCell>
-                  <TableCell><strong>Schedule Time</strong></TableCell> {/* Schedule Time column */}
-                  <TableCell align="right"><strong>Remove</strong></TableCell>
+                  <TableCell>
+                    <strong>Name</strong>
+                  </TableCell>
+                  <TableCell>
+                    <strong>Email</strong>
+                  </TableCell>
+                  <TableCell>
+                    <strong>CV</strong>
+                  </TableCell>
+                  <TableCell>
+                    <strong>Status</strong>
+                  </TableCell>
+                  <TableCell>
+                    <strong>Actions</strong>
+                  </TableCell>
+                  <TableCell>
+                    <strong>Schedule Time</strong>
+                  </TableCell>{" "}
+                  {/* Schedule Time column */}
+                  <TableCell align="right">
+                    <strong>Remove</strong>
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -215,24 +255,47 @@ const CollegeAdminApplicants = () => {
                       <TableCell>{applicant.studentId.email}</TableCell>
                       <TableCell>
                         {applicant.studentId.cv ? (
-                          <Link href={applicant.studentId.cv} target="_blank" rel="noopener noreferrer">
+                          <Link
+                            href={applicant.studentId.cv}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
                             View CV
                           </Link>
                         ) : (
-                          <Typography sx={{ color: "gray" }}>No CV uploaded</Typography>
+                          <Typography sx={{ color: "gray" }}>
+                            No CV uploaded
+                          </Typography>
                         )}
                       </TableCell>
                       <TableCell>
-                        <Typography sx={{ color: applicant.status === "Accepted" ? "green" : applicant.status === "Rejected" ? "red" : "gray" }}>
+                        <Typography
+                          sx={{
+                            color:
+                              applicant.status === "Accepted"
+                                ? "green"
+                                : applicant.status === "Rejected"
+                                ? "red"
+                                : "gray",
+                          }}
+                        >
                           {applicant.status || "Pending"}
                         </Typography>
                       </TableCell>
-                      <TableCell sx={{display:'flex',flexDirection:'column', gap:1.5}}>
+                      <TableCell
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 1.5,
+                        }}
+                      >
                         <Button
                           variant="contained"
                           color="success"
                           disabled={applicant.status === "Accepted"}
-                          onClick={() => handleDecision(applicant._id, "Accepted")}
+                          onClick={() =>
+                            handleDecision(applicant._id, "Accepted")
+                          }
                         >
                           Accept
                         </Button>
@@ -240,7 +303,9 @@ const CollegeAdminApplicants = () => {
                           variant="contained"
                           color="error"
                           disabled={applicant.status === "Rejected"}
-                          onClick={() => handleDecision(applicant._id, "Rejected")}
+                          onClick={() =>
+                            handleDecision(applicant._id, "Rejected")
+                          }
                         >
                           Reject
                         </Button>
@@ -273,20 +338,30 @@ const CollegeAdminApplicants = () => {
                           )
                         ) : (
                           applicant.status === "Rejected" && (
-                            <Typography sx={{ color: "gray" }}>Schedule Time</Typography>
+                            <Typography sx={{ color: "gray" }}>
+                              Schedule Time
+                            </Typography>
                           )
                         )}
                       </TableCell>
                       <TableCell align="right">
                         <IconButton onClick={() => handleDelete(applicant._id)}>
-                          <Cancel sx={{ color: "gray", transition: "color 0.3s", "&:hover": { color: "red" } }} />
+                          <Cancel
+                            sx={{
+                              color: "gray",
+                              transition: "color 0.3s",
+                              "&:hover": { color: "red" },
+                            }}
+                          />
                         </IconButton>
                       </TableCell>
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={7} align="center">No applicants found.</TableCell>
+                    <TableCell colSpan={7} align="center">
+                      No applicants found.
+                    </TableCell>
                   </TableRow>
                 )}
               </TableBody>
@@ -308,6 +383,9 @@ const CollegeAdminApplicants = () => {
             InputLabelProps={{
               shrink: true,
             }}
+            inputProps={{
+              min: now, // prevent past dates
+            }}
           />
         </DialogContent>
         <DialogActions>
@@ -324,4 +402,3 @@ const CollegeAdminApplicants = () => {
 };
 
 export default CollegeAdminApplicants;
-

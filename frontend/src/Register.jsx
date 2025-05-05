@@ -25,6 +25,8 @@ const Register = () => {
     email: "",
     otp: "",
     registrationNumber: "",
+    password: "",
+    role: "",
     cv: "",
   });
 
@@ -109,17 +111,24 @@ const Register = () => {
     }
   };
 
-  const handleRegister = async (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const response = await axios.post(
-        "http://localhost:4000/api/v1/user/register",
-        formData
-      );
-      toast.success(response.data.message);
-      setTimeout(() => navigate("/"), 1500);
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Registration failed!");
+
+    if (!otpSent) {
+      handleSendOtp();
+    } else if (!otpVerified) {
+      handleVerifyOtp();
+    } else {
+      try {
+        const response = await axios.post(
+          "http://localhost:4000/api/v1/user/register",
+          formData
+        );
+        toast.success(response.data.message);
+        setTimeout(() => navigate("/"), 1500);
+      } catch (error) {
+        toast.error(error.response?.data?.message || "Registration failed!");
+      }
     }
   };
 
@@ -131,7 +140,7 @@ const Register = () => {
           <Typography variant="h4" sx={{ mb: 2, fontWeight: "bold" }}>
             Register
           </Typography>
-          <Box component="form" onSubmit={handleRegister}>
+          <Box component="form" onSubmit={handleFormSubmit}>
             <TextField
               fullWidth
               label="Full Name"
@@ -170,8 +179,8 @@ const Register = () => {
                 <Typography variant="body2">{formatTime(timer)}</Typography>
                 <IconButton
                   onClick={() => {
-                    setTimer(600); // Reset the timer
-                    handleSendOtp(); // Resend OTP
+                    setTimer(600);
+                    handleSendOtp();
                   }}
                 >
                   <RefreshIcon />
@@ -182,22 +191,58 @@ const Register = () => {
               <>
                 <TextField
                   fullWidth
-                  label="College ID"
-                  name="registrationNumber"
-                  value={formData.registrationNumber}
+                  select
+                  label="Select Role"
+                  name="role"
+                  value={formData.role}
+                  onChange={handleChange}
+                  margin="normal"
+                  required
+                  SelectProps={{ native: true }}
+                >
+                  <option value="">Select Role</option>
+                  <option value="mainAdmin">Main Admin</option>
+                  <option value="collegeAdmin">College Admin</option>
+                  <option value="student">Student</option>
+                </TextField>
+
+                {(formData.role === "collegeAdmin" ||
+                  formData.role === "student") && (
+                  <TextField
+                    fullWidth
+                    label="College ID"
+                    name="registrationNumber"
+                    value={formData.registrationNumber}
+                    onChange={handleChange}
+                    margin="normal"
+                    required
+                  />
+                )}
+
+                <TextField
+                  fullWidth
+                  type="password"
+                  label="Password"
+                  name="password"
+                  value={formData.password}
                   onChange={handleChange}
                   margin="normal"
                   required
                 />
-                <Box sx={{ mt: 2 }}>
-                  <Typography variant="body1">Upload CV (PDF Only)</Typography>
-                  <Input
-                    type="file"
-                    accept="application/pdf"
-                    onChange={handleFileChange}
-                    required
-                  />
-                </Box>
+
+                {formData.role === "student" && (
+                  <Box sx={{ mt: 2 }}>
+                    <Typography variant="body1">
+                      Upload CV (PDF Only)
+                    </Typography>
+                    <Input
+                      type="file"
+                      accept="application/pdf"
+                      onChange={handleFileChange}
+                      required
+                    />
+                  </Box>
+                )}
               </>
             )}
             <Button
@@ -205,17 +250,18 @@ const Register = () => {
               color="primary"
               fullWidth
               sx={{ mt: 2 }}
-              onClick={
-                !otpSent
-                  ? handleSendOtp
-                  : !otpVerified
-                  ? handleVerifyOtp
-                  : handleRegister
-              }
+              type="submit"
+              disabled={cvUploading}
             >
               {!otpSent ? "Send OTP" : !otpVerified ? "Verify OTP" : "Register"}
             </Button>
           </Box>
+          <Typography sx={{ mt: 2, textAlign: "center" }}>
+            Already have an account?{" "}
+            <span onClick={() => navigate("/")} style={styles.link}>
+              Login
+            </span>
+          </Typography>
         </Box>
       </Container>
     </Box>
@@ -228,8 +274,7 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
     minHeight: "100vh",
-    backgroundImage:
-      "url('https://snckollam.ac.in/kezoofti/2019/10/campus-placement.jpg')",
+    backgroundImage: "linear-gradient(to right, blue, white)",
     backgroundSize: "cover",
     backgroundPosition: "center",
     backgroundAttachment: "fixed",
@@ -239,7 +284,7 @@ const styles = {
     padding: "30px",
     borderRadius: "8px",
     boxShadow: "0 4px 10px rgba(0, 0, 0, 0.1)",
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    backgroundColor: "rgb(255, 255, 255)",
     textAlign: "center",
     width: "100%",
     maxWidth: "400px",

@@ -186,18 +186,18 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
     minHeight: "100vh",
-    backgroundImage:
-      "url('https://snckollam.ac.in/kezoofti/2019/10/campus-placement.jpg')",
+    backgroundImage: "linear-gradient(to right, blue, white)",
     backgroundSize: "cover",
     backgroundPosition: "center",
     backgroundAttachment: "fixed",
     backgroundRepeat: "no-repeat",
   },
+  
   formContainer: {
     padding: "30px",
     borderRadius: "8px",
     boxShadow: "0 4px 10px rgba(0, 0, 0, 0.1)",
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    backgroundColor: "rgb(255, 255, 255)",
     textAlign: "center",
     width: "100%",
     maxWidth: "400px",

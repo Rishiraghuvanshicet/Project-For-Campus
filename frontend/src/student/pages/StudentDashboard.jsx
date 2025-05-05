@@ -82,8 +82,10 @@ const StudentDashboard = () => {
     setFilter(event.target.value); // Set the selected filter
   };
 
-  // Filter jobs based on the selected category
-  const filteredJobs = filter === "All" ? jobs : jobs.filter((job) => job.title === filter);
+  // Convert filter value and compare job titles in uppercase
+  const filteredJobs = filter === "All"
+    ? jobs
+    : jobs.filter((job) => job.title.toUpperCase() === filter.toUpperCase());
 
   return (
     <>
